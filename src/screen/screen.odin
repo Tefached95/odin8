@@ -65,7 +65,7 @@ draw_sprite :: proc(screen: ^Screen($W, $H), x, y: byte, data: []byte) -> bool {
     return any_xord
 }
 
-xor_bool_range :: proc(target: ^[$W]bool, source: []bool, start: int) -> (xord: bool) {
+xor_bool_range :: proc(target: ^[$W]bool, source: []bool, start: int) -> bool {
     target_length := len(target^)
 
     for pixel, index in source {
@@ -79,7 +79,7 @@ xor_bool_range :: proc(target: ^[$W]bool, source: []bool, start: int) -> (xord: 
         (target^)[actual_index] = state
     }
 
-    return
+    return xord
 }
 
 boolean_xor :: proc(a, b: bool) -> (state, unset: bool) {
