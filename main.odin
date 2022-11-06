@@ -23,8 +23,6 @@ main :: proc() {
 	mem := memory.make_memory()
 	defer free(mem)
 
-	// fmt.printf("%#x >> 4 = %d", 0x14, 0x14 >> 4)
-
 	memory.load_program_into_memory(mem, file)
 	interpreter.start_run(mem, scr)
 }
