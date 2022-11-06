@@ -72,7 +72,7 @@ start_run :: proc(mem: ^memory.Memory, scr: ^screen.Screen($W, $H)) {
             case 0x4:
                 skip_check_equality(&itp, mem, instr.x, instr.kk_byte, Equality.Neq)
             case 0x5:
-                jump_if_registers_are_equal(&itp, mem, instr.x, instr.y)
+                jump_if_registers_are_equal(&itp, mem, instr.x, instr.y, Equality.Eq)
             case 0x6:
                 set_register_to_value(mem, instr.x, instr.kk_byte)
             case 0x7:
