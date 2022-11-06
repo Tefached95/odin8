@@ -39,13 +39,6 @@ draw_screen :: proc(screen: ^Screen($W, $H)) {
 }
 
 clear_screen :: proc(screen: ^Screen($W, $H)) {
-    // for y in 0..<screen.height {
-    //     for x in 0..<screen.width {
-    //         screen.pixels[y][x] = false
-    //     }
-    // }
-
-    // draw_screen(screen)
     fmt.print("\033c")
 }
 
