@@ -15,7 +15,7 @@ make_screen :: proc($Width: int, $Height: int) -> ^Screen(Width, Height) {
     screen := new_clone(Screen(Width, Height) {
         width = Width,
         height = Height,
-        pixels = make_empty_2d_array(Width, Height)
+        pixels = [Height][Width]bool{}
     })
 
     return screen
@@ -85,15 +85,6 @@ xor_bool_range :: proc(target: ^[$W]bool, source: []bool, start: int) -> (xord: 
 boolean_xor :: proc(a, b: bool) -> (state, unset: bool) {
     state = a != b
     unset = a && b
-
-    return
-}
-
-@(private)
-make_empty_2d_array :: proc($Width, $Height: int) -> (data: [Height][Width]bool) {
-    for _, row in data {
-        for _, idx in data[row] do data[row][idx] = false
-    }
 
     return
 }
