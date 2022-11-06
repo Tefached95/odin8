@@ -11,9 +11,19 @@ import "odin8:instruction"
 NEXT_ADDR :: 0x1
 STEP_SIZE :: 0x2
 
-Sub_Reversal    :: enum { Standard,  Reversed            }
-Bitwise_Op      :: enum { And = 0x1, Or = 0x2, Xor = 0x3 }
-Shift_Direction :: enum { Left,      Right               }
+Sub_Reversal :: enum {
+    Standard,
+    Reversed
+}
+Bitwise_Op :: enum byte {
+    And = 0x1,
+    Or = 0x2,
+    Xor = 0x3
+}
+Shift_Direction :: enum {
+    Left,
+    Right
+}
 
 Interpreter :: struct {
     program_counter: u16
@@ -71,7 +81,7 @@ start_run :: proc(mem: ^memory.Memory, scr: ^screen.Screen($W, $H)) {
                     case 0x0:
                         store_value_from_vy_into_vx(mem, instr.x, instr.y)
                     case 0x1..=0x3:
-                        do_bitwise_ops(mem, instr.x, instr.y, instr.nibble)
+                        do_bitwise_ops(mem, instr.x, instr.y, Bitwise_Op(instr.nibble))
                     case 0x4:
                         add_registers(mem, instr.x, instr.y)
                     case 0x5:
@@ -176,15 +186,15 @@ store_value_from_vy_into_vx :: proc(mem: ^memory.Memory, register_x, register_y:
 // 8xy3 - XOR Vx, Vy
 // Set Vx = Vx XOR Vy.
 // Performs a bitwise exclusive OR on the values of Vx and Vy, then stores the result in Vx. An exclusive OR compares the corrseponding bits from two values, and if the bits are not both the same, then the corresponding bit in the result is set to 1. Otherwise, it is 0.
-do_bitwise_ops :: proc(mem: ^memory.Memory, register_x, register_y: byte, bitwise_op: byte) {
+do_bitwise_ops :: proc(mem: ^memory.Memory, register_x, register_y: byte, bitwise_op: Bitwise_Op) {
     result: byte
 
     switch bitwise_op {
-        case 0x0:
+        case .Or:
             result = memory.get_register(mem, register_x) | memory.get_register(mem, register_y)
-        case 0x1:
+        case .And:
             result = memory.get_register(mem, register_x) & memory.get_register(mem, register_y)
-        case 0x2:
+        case .Xor:
             result = memory.get_register(mem, register_x) ~ memory.get_register(mem, register_y)
     }
 
