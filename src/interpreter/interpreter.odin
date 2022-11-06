@@ -11,6 +11,10 @@ import "odin8:instruction"
 NEXT_ADDR :: 0x1
 STEP_SIZE :: 0x2
 
+Equality :: enum {
+    Eq,
+    Neq
+}
 Sub_Reversal :: enum {
     Standard,
     Reversed
@@ -61,17 +65,14 @@ start_run :: proc(mem: ^memory.Memory, scr: ^screen.Screen($W, $H)) {
                 itp.program_counter = instr.address
                 continue
             case 0x2:
-                call_subroutine(&itp, mem)
-                itp.program_counter = instr.address
+                call_subroutine(&itp, mem, instr.address)
                 continue
             case 0x3:
-                should_skip := skip_next_instr_if_reg_eq(mem, instr.x, instr.kk_byte)
-                if should_skip do itp.program_counter += STEP_SIZE
+                jump_if_equals(&itp, mem, instr.x, instr.kk_byte, Equality.Eq)
             case 0x4:
-                should_skip := !skip_next_instr_if_reg_eq(mem, instr.x, instr.kk_byte)
-                if should_skip do itp.program_counter += STEP_SIZE
+                jump_if_equals(&itp, mem, instr.x, instr.kk_byte, Equality.Neq)
             case 0x5:
-                should_skip := skip_next_instr_if_regs_eq(mem, instr.x, instr.y)
+                jump_if_registers_are_equal(&itp, mem, instr.x, instr.y)
             case 0x6:
                 set_register_to_value(mem, instr.x, instr.kk_byte)
             case 0x7:
@@ -94,8 +95,7 @@ start_run :: proc(mem: ^memory.Memory, scr: ^screen.Screen($W, $H)) {
                         shift_register(mem, instr.x, Shift_Direction.Left)
                 }
             case 0x9:
-                should_skip := !skip_next_instr_if_regs_eq(mem, instr.x, instr.y)
-                if should_skip do itp.program_counter += STEP_SIZE
+                jump_if_registers_are_equal(&itp, mem, instr.x, instr.y, Equality.Neq)
             case 0xA:
                 set_register_i_to_address(mem, instr.address)
             case 0xB:
@@ -123,9 +123,11 @@ sysaddr :: proc() {
     // @TODO: should probably be ignored?
 }
 
-call_subroutine :: proc(itp: ^Interpreter, mem: ^memory.Memory) {
+call_subroutine :: proc(itp: ^Interpreter, mem: ^memory.Memory, address: u16) {
     mem.program_stack.pointer += 1
     mem.program_stack.stack[mem.program_stack.pointer] = itp.program_counter
+
+    itp.program_counter = address
 }
 
 return_from_subroutine :: proc(itp: ^Interpreter, mem: ^memory.Memory) {
@@ -140,16 +142,34 @@ cls :: proc(scr: ^screen.Screen) {
 // 3xkk - SE Vx, byte
 // Skip next instruction if Vx = kk.
 // The interpreter compares register Vx to kk, and if they are equal, increments the program counter by 2.
-skip_next_instr_if_reg_eq :: proc(mem: ^memory.Memory, register: u8, value: byte) -> bool {
-    return memory.get_register(mem, register) == value
+jump_if_equals :: proc(itp: ^Interpreter, mem: ^memory.Memory, register: u8, value: byte, comp: Equality) {
+    value_x := memory.get_register(mem, register)
+    equal := value_x == value
+
+    switch comp {
+        case .Eq:
+            if equal  do itp.program_counter += STEP_SIZE
+        case .Neq:
+            if !equal do itp.program_counter += STEP_SIZE
+    }
 }
 
 
 // 5xy0 - SE Vx, Vy
 // Skip next instruction if Vx = Vy.
 // The interpreter compares register Vx to register Vy, and if they are equal, increments the program counter by 2.
-skip_next_instr_if_regs_eq :: proc(mem: ^memory.Memory, register_x, register_y: byte) -> bool {
-    return memory.get_register(mem, register_x) == memory.get_register(mem, register_y)
+jump_if_registers_are_equal :: proc(itp: ^Interpreter, mem: ^memory.Memory, register_x, register_y: byte, comp: Equality) {
+    value_x := memory.get_register(mem, register_x)
+    value_y := memory.get_register(mem, register_y)
+
+    equal := value_x == value_y
+
+    switch comp {
+        case .Eq:
+            if equal  do itp.program_counter += STEP_SIZE
+        case .Neq:
+            if !equal do itp.program_counter += STEP_SIZE
+    }
 }
 
 // 6xkk - LD Vx, byte
