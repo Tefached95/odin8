@@ -59,6 +59,7 @@ draw_sprite :: proc(screen: ^Screen($W, $H), x, y: byte, data: []byte) -> bool {
 }
 
 xor_bool_range :: proc(target: ^[$W]bool, source: []bool, start: int) -> bool {
+    xord := false
     target_length := len(target^)
 
     for pixel, index in source {
