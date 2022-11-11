@@ -2,7 +2,7 @@ package instruction
 
 import "core:fmt"
 
-Instruction :: struct {
+Instruction :: struct #align 16 {
     address: u16,
     most_significant_byte, nibble, kk_byte, x, y: byte
 }

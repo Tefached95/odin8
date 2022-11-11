@@ -2,6 +2,7 @@ package interpreter
 
 import "core:fmt"
 import "core:time"
+import "core:strings"
 import rnd "core:math/rand"
 
 import "odin8:screen"
@@ -35,20 +36,24 @@ Interpreter :: struct {
 
 start_run :: proc(mem: ^memory.Memory, scr: ^screen.Screen($W, $H)) {
     instr: instruction.Instruction;
-
+    
+    sb := strings.builder_make()
+    defer strings.builder_destroy(&sb)
+    
     itp := Interpreter{program_counter = 0x200}
-    eof := false
+    
+    instruction_cache: map[string]instruction.Instruction
+    create_instruction_cache(&sb, mem, &itp, &instruction_cache)
 
-    for eof != true {
+    for {
         assert(itp.program_counter % 2 == 0, fmt.aprintf("Program counter stopped on an odd address: %X\n", itp.program_counter))
         
-        sleep_ms(16)
-
         command_byte  := memory.get_at(mem, itp.program_counter)
         argument_byte := memory.get_at(mem, itp.program_counter + NEXT_ADDR)
-
-        instr = instruction.parse_from_bytes(command_byte, argument_byte)
-
+        
+        cache_key := bytes_to_cache_key(&sb, command_byte, argument_byte, &itp)
+        instr = instruction_cache[cache_key]
+        
         switch instr.most_significant_byte {
             case 0x0:
                 if (argument_byte == 0xEE) {
@@ -108,15 +113,30 @@ start_run :: proc(mem: ^memory.Memory, scr: ^screen.Screen($W, $H)) {
                 panic(fmt.aprintf("Unexpected command byte %X", command_byte))
         }
 
-        if itp.program_counter + STEP_SIZE > len(mem.ram) {
-            eof = true
-            continue
-        } else {
-            itp.program_counter += STEP_SIZE
-        }
+        itp.program_counter += STEP_SIZE
     }
+}
 
-    fmt.print("Done\n")
+bytes_to_cache_key :: proc(sb: ^strings.Builder, b1, b2: byte, itp: ^Interpreter) -> string {
+    defer strings.builder_reset(sb)
+        
+    fmt.sbprintf(sb, "%X%X", b1, b2)
+        
+    cache_key := strings.to_string(sb^)
+    return cache_key
+}
+
+create_instruction_cache :: proc(sb: ^strings.Builder, mem: ^memory.Memory, itp: ^Interpreter, cache: ^map[string]instruction.Instruction) {
+    cache^ = make(map[string]instruction.Instruction, mem.program_length / 2)
+    
+    for i := 0; i < mem.program_length; i += STEP_SIZE {
+        command_byte  := memory.get_at(mem, u16(i) + itp.program_counter)
+        argument_byte := memory.get_at(mem, u16(i) + itp.program_counter + NEXT_ADDR)
+        
+        cache_key := bytes_to_cache_key(sb, command_byte, argument_byte, itp)
+        instr := instruction.parse_from_bytes(command_byte, argument_byte)
+        (cache^)[cache_key] = instr
+    }
 }
 
 sysaddr :: proc() {
