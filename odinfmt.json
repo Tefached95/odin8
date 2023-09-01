@@ -1,6 +1,6 @@
 {
     "character_width": 80,
-    "tabs": true,
+    "tabs": false,
     "tabs_width": 4,
     "spaces": 4
 }
