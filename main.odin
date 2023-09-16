@@ -11,7 +11,7 @@ import "odin8:instruction"
 FILENAME :: "./programs/maze.ch8"
 
 main :: proc() {
-	file, ok:= os.read_entire_file_from_filename(FILENAME)
+	file, ok := os.read_entire_file_from_filename(FILENAME)
 
 	if ok == false {
 		panic(fmt.aprintf("Failed reading from %s.", FILENAME))
