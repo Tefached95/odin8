@@ -5,9 +5,9 @@ This is a simple Chip8 emulator written in Odin as an exercise in both emulation
 ## Compile
 Make sure you have the Odin compiler set up and visible in your `PATH`. [See here for more info.](https://odin-lang.org/docs/install/)
 
-`$ odin build . --collection:odin8=src`
+`$ make build`
 
-`$ ./Odin8`
+`$ ./odin8`
 
 ## TODOs
 - [ ] Add support for keyboard input
