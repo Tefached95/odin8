@@ -3,7 +3,6 @@ package screen
 import "core:fmt"
 import "core:mem"
 import "core:strings"
-import "core:sys"
 
 Screen :: struct($W, $H: int) {
     width:  int,

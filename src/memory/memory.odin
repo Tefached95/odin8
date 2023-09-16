@@ -3,7 +3,7 @@ package memory
 import "core:fmt"
 
 MEMORY_START :: 0x200
-MEMORY_END :: 0xFFF
+MEMORY_END   :: 0xFFF
 
 Program_Stack :: struct {
     stack:   []u16,
