@@ -1,7 +1,5 @@
 package instruction
 
-import "core:fmt"
-
 Instruction :: struct {
     address:                                      u16,
     most_significant_byte, nibble, kk_byte, x, y: byte,

@@ -1,8 +1,7 @@
 package screen
 
-import "core:fmt"
-import "core:mem"
-import "core:strings"
+import fmt "core:fmt"
+import strings "core:strings"
 
 Screen :: struct($W, $H: int) {
     width:  int,

@@ -1,14 +1,12 @@
 package cpu
 
 import "core:fmt"
-import "core:log"
 import rnd "core:math/rand"
 import "core:time"
 
-import "odin8:instruction"
-import "odin8:interpreter"
-import "odin8:memory"
-import "odin8:screen"
+import interpreter "odin8:interpreter"
+import memory "odin8:memory"
+import screen "odin8:screen"
 
 step :: proc(
     itp: ^interpreter.Interpreter,

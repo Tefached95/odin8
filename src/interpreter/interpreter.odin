@@ -1,11 +1,10 @@
 package interpreter
 
-import "core:fmt"
-import "core:strings"
+import fmt "core:fmt"
+import strings "core:strings"
 
-import "odin8:instruction"
-import "odin8:memory"
-import "odin8:screen"
+import instruction "odin8:instruction"
+import memory "odin8:memory"
 
 NEXT_ADDR :: 0x1
 STEP_SIZE :: 0x2

@@ -3,11 +3,10 @@ package main
 import "core:fmt"
 import "core:os"
 
-import "odin8:cpu"
-import "odin8:instruction"
-import "odin8:interpreter"
-import "odin8:memory"
-import "odin8:screen"
+import cpu "odin8:cpu"
+import interpreter "odin8:interpreter"
+import memory "odin8:memory"
+import screen "odin8:screen"
 
 FILENAME :: "./programs/maze.ch8"
 
