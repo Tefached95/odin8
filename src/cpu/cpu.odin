@@ -1,113 +1,147 @@
 package cpu
 
-import rnd "core:math/rand"
 import "core:fmt"
+import "core:log"
+import rnd "core:math/rand"
 import "core:time"
 
-import "odin8:memory"
-import "odin8:screen"
 import "odin8:instruction"
 import "odin8:interpreter"
+import "odin8:memory"
+import "odin8:screen"
 
-step :: proc(itp: ^interpreter.Interpreter, mem: ^memory.Memory, scr: ^screen.Screen($W, $H)) {
-    sleep_ms(99)
+step :: proc(
+    itp: ^interpreter.Interpreter,
+    mem: ^memory.Memory,
+    scr: ^screen.Screen($W, $H),
+) {
     instr := interpreter.get_current_instruction(itp, mem)
 
-    fmt.printf("Current program counter: %v\n", itp.program_counter)
-    fmt.printf("Current instruction cache: %#v\n", itp.instruction_cache)
-
     switch instr.most_significant_byte {
-        case 0x0:
-            if (instr.kk_byte == 0xEE) {
-                return_from_subroutine(itp, mem)
-                return
-            }
-
-            if (instr.kk_byte == 0xE0) {
-                screen.clear_screen(scr)
-            }
-
+    case 0x0:
+        if (instr.kk_byte == 0xEE) {
+            return_from_subroutine(itp, mem)
             return
-        case 0x1:
-            itp.program_counter = instr.address
-            return
-        case 0x2:
-            call_subroutine(itp, mem, instr.address)
-            return
-        case 0x3:
-            skip_check_equality(itp, mem, instr.x, instr.kk_byte, interpreter.Equality.Eq)
-        case 0x4:
-            skip_check_equality(
-                itp,
-                mem,
-                instr.x,
-                instr.kk_byte,
-                interpreter.Equality.Neq,
-            )
-        case 0x5:
-            jump_if_registers_are_equal(
-                itp,
-                mem,
-                instr.x,
-                instr.y,
-                interpreter.Equality.Eq,
-            )
-        case 0x6:
-            set_register_to_value(mem, instr.x, instr.kk_byte)
-        case 0x7:
-            increment_register_by_value(mem, instr.x, instr.kk_byte)
-        case 0x8:
-            switch instr.nibble {
-            case 0x0:
-                store_value_from_vy_into_vx(mem, instr.x, instr.y)
-            case 0x1 ..= 0x3:
-                do_bitwise_ops(mem, instr.x, instr.y, interpreter.Bitwise_Op(instr.nibble))
-            case 0x4:
-                add_registers(mem, instr.x, instr.y)
-            case 0x5:
-                sub_registers(mem, instr.x, instr.y, interpreter.Sub_Reversal.Standard)
-            case 0x6:
-                shift_register(mem, instr.x, interpreter.Shift_Direction.Right)
-            case 0x7:
-                sub_registers(mem, instr.x, instr.y, interpreter.Sub_Reversal.Reversed)
-            case 0xE:
-                shift_register(mem, instr.x, interpreter.Shift_Direction.Left)
-            }
-        case 0x9:
-            jump_if_registers_are_equal(
-                itp,
-                mem,
-                instr.x,
-                instr.y,
-                interpreter.Equality.Neq,
-            )
-        case 0xA:
-            set_register_i_to_address(mem, instr.address)
-        case 0xB:
-            jump_to_v0_address(itp, mem, instr.address)
-        case 0xC:
-            set_register_to_random_byte_anded(mem, instr.x, instr.kk_byte)
-        case 0xD:
-            draw(scr, mem, instr.x, instr.y, instr.nibble)
-        case:
-            panic(fmt.aprintf("Unexpected command byte %X", instr.most_significant_byte))
         }
 
-        interpreter.increment_program_counter(itp)
+        if (instr.kk_byte == 0xE0) {
+            screen.clear_screen(scr)
+        }
+
+        return
+    case 0x1:
+        itp.program_counter = instr.address
+        return
+    case 0x2:
+        call_subroutine(itp, mem, instr.address)
+        return
+    case 0x3:
+        skip_check_equality(
+            itp,
+            mem,
+            instr.x,
+            instr.kk_byte,
+            interpreter.Equality.Eq,
+        )
+    case 0x4:
+        skip_check_equality(
+            itp,
+            mem,
+            instr.x,
+            instr.kk_byte,
+            interpreter.Equality.Neq,
+        )
+    case 0x5:
+        jump_if_registers_are_equal(
+            itp,
+            mem,
+            instr.x,
+            instr.y,
+            interpreter.Equality.Eq,
+        )
+    case 0x6:
+        set_register_to_value(mem, instr.x, instr.kk_byte)
+    case 0x7:
+        increment_register_by_value(mem, instr.x, instr.kk_byte)
+    case 0x8:
+        switch instr.nibble {
+        case 0x0:
+            store_value_from_vy_into_vx(mem, instr.x, instr.y)
+        case 0x1 ..= 0x3:
+            do_bitwise_ops(
+                mem,
+                instr.x,
+                instr.y,
+                interpreter.Bitwise_Op(instr.nibble),
+            )
+        case 0x4:
+            add_registers(mem, instr.x, instr.y)
+        case 0x5:
+            sub_registers(
+                mem,
+                instr.x,
+                instr.y,
+                interpreter.Sub_Reversal.Standard,
+            )
+        case 0x6:
+            shift_register(mem, instr.x, interpreter.Shift_Direction.Right)
+        case 0x7:
+            sub_registers(
+                mem,
+                instr.x,
+                instr.y,
+                interpreter.Sub_Reversal.Reversed,
+            )
+        case 0xE:
+            shift_register(mem, instr.x, interpreter.Shift_Direction.Left)
+        }
+    case 0x9:
+        jump_if_registers_are_equal(
+            itp,
+            mem,
+            instr.x,
+            instr.y,
+            interpreter.Equality.Neq,
+        )
+    case 0xA:
+        set_register_i_to_address(mem, instr.address)
+    case 0xB:
+        jump_to_v0_address(itp, mem, instr.address)
+    case 0xC:
+        set_register_to_random_byte_anded(mem, instr.x, instr.kk_byte)
+    case 0xD:
+        draw(scr, mem, instr.x, instr.y, instr.nibble)
+    case:
+        panic(
+            fmt.aprintf(
+                "Unexpected command byte %X",
+                instr.most_significant_byte,
+            ),
+        )
+    }
+
+    interpreter.increment_program_counter(itp)
 }
 
 sysaddr :: proc() {
     // @TODO: should probably be ignored?
 }
 
-call_subroutine :: proc(itp: ^interpreter.Interpreter, mem: ^memory.Memory, address: u16) {
+call_subroutine :: proc(
+    itp: ^interpreter.Interpreter,
+    mem: ^memory.Memory,
+    address: u16,
+) {
     mem.program_stack.pointer += 1
     mem.program_stack.stack[mem.program_stack.pointer] = itp.program_counter
 
     itp.program_counter = address
 }
 
-return_from_subroutine :: proc(itp: ^interpreter.Interpreter, mem: ^memory.Memory) {
+return_from_subroutine :: proc(
+    itp: ^interpreter.Interpreter,
+    mem: ^memory.Memory,
+) {
     itp.program_counter = mem.program_stack.stack[mem.program_stack.pointer]
     mem.program_stack.pointer -= 1
 }

@@ -29,8 +29,8 @@ Shift_Direction :: enum {
 }
 
 Interpreter :: struct {
-    program_counter: u16,
-    instruction_cache: map[string]instruction.Instruction
+    program_counter:   u16,
+    instruction_cache: map[string]instruction.Instruction,
 }
 
 make_interpreter :: proc(mem: ^memory.Memory) -> ^Interpreter {
@@ -38,15 +38,22 @@ make_interpreter :: proc(mem: ^memory.Memory) -> ^Interpreter {
     defer strings.builder_destroy(&sb)
 
     cache := make(map[string]instruction.Instruction, mem.program_length / 2)
-    defer free(&cache)
     populate_instruction_cache(&sb, mem, &cache)
 
-    itp := new_clone(Interpreter{ program_counter = memory.MEMORY_START, instruction_cache = cache})
+    itp := new_clone(
+        Interpreter{
+            program_counter = memory.MEMORY_START,
+            instruction_cache = cache,
+        },
+    )
 
     return itp
 }
 
-get_current_instruction :: proc(itp: ^Interpreter, mem: ^memory.Memory) -> ^instruction.Instruction {
+get_current_instruction :: proc(
+    itp: ^Interpreter,
+    mem: ^memory.Memory,
+) -> ^instruction.Instruction {
     sb := strings.builder_make()
     defer strings.builder_destroy(&sb)
 
@@ -58,16 +65,15 @@ get_current_instruction :: proc(itp: ^Interpreter, mem: ^memory.Memory) -> ^inst
     instr, ok := &itp.instruction_cache[cache_key]
 
     if ok == false {
-        panic(fmt.aprintf("No instruction found for cache key %v\n", cache_key))
+        panic(
+            fmt.aprintf("No instruction found for cache key %v\n", cache_key),
+        )
     }
 
     return instr
 }
 
-bytes_to_cache_key :: proc(
-    sb: ^strings.Builder,
-    b1, b2: byte
-) -> string {
+bytes_to_cache_key :: proc(sb: ^strings.Builder, b1, b2: byte) -> string {
     defer strings.builder_reset(sb)
 
     fmt.sbprintf(sb, "%X%X", b1, b2)
@@ -100,5 +106,5 @@ populate_instruction_cache :: proc(
 }
 
 increment_program_counter :: proc(itp: ^Interpreter) {
-    itp.program_counter =+ STEP_SIZE
+    itp.program_counter += STEP_SIZE
 }

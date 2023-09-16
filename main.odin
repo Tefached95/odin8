@@ -1,34 +1,34 @@
 package main
 
-import "core:os"
 import "core:fmt"
+import "core:os"
 
-import "odin8:screen"
-import "odin8:memory"
 import "odin8:cpu"
-import "odin8:interpreter"
 import "odin8:instruction"
+import "odin8:interpreter"
+import "odin8:memory"
+import "odin8:screen"
 
 FILENAME :: "./programs/maze.ch8"
 
 main :: proc() {
-	file, ok := os.read_entire_file_from_filename(FILENAME)
+    file, ok := os.read_entire_file_from_filename(FILENAME)
 
-	if ok == false {
-		panic(fmt.aprintf("Failed reading from %s.", FILENAME))
-	}
+    if ok == false {
+        panic(fmt.aprintf("Failed reading from %s.", FILENAME))
+    }
 
-	scr := screen.make_screen(64, 32)
-	defer free(scr)
+    scr := screen.make_screen(64, 32)
+    defer free(scr)
 
-	mem := memory.make_memory()
-	memory.load_program_into_memory(mem, file)
-	defer free(mem)
+    mem := memory.make_memory()
+    memory.load_program_into_memory(mem, file)
+    defer free(mem)
 
-	itp := interpreter.make_interpreter(mem)
-	defer free(itp)
+    itp := interpreter.make_interpreter(mem)
+    defer free(itp)
 
-	for {
-		cpu.step(itp, mem, scr)
-	}
+    for {
+        cpu.step(itp, mem, scr)
+    }
 }
