@@ -5,6 +5,7 @@ import "core:fmt"
 
 import "odin8:screen"
 import "odin8:memory"
+import "odin8:cpu"
 import "odin8:interpreter"
 import "odin8:instruction"
 
@@ -21,8 +22,13 @@ main :: proc() {
 	defer free(scr)
 
 	mem := memory.make_memory()
+	memory.load_program_into_memory(mem, file)
 	defer free(mem)
 
-	memory.load_program_into_memory(mem, file)
-	interpreter.start_run(mem, scr)
+	itp := interpreter.make_interpreter(mem)
+	defer free(itp)
+
+	for {
+		cpu.step(itp, mem, scr)
+	}
 }
