@@ -13,11 +13,14 @@ Memory :: struct {
     registers:      [16]byte,
     register_i:     u16,
     program_length: int,
-    program_stack:  ^Program_Stack,
+    program_stack:  Program_Stack,
 }
 
 make_memory :: proc() -> ^Memory {
-    ps := new_clone(Program_Stack{stack = [16]u16{}, pointer = 0x0000})
+    ps := Program_Stack {
+        stack = [16]u16{},
+        pointer = 0x0000,
+    }
 
     return new_clone(
         Memory{
