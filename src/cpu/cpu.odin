@@ -459,7 +459,7 @@ spread_registers_into_memory :: proc(mem: ^memory.Memory, register_x: byte) {
     for i in 0 ..= register_x {
         register_value := memory.get_register(mem, i)
         memory.set_at(mem, (here), register_value)
-        here += interpreter.STEP_SIZE
+        here += interpreter.NEXT_ADDR
     }
 }
 
@@ -471,7 +471,7 @@ load_from_memory_into_registers :: proc(
     for i in 0 ..= register_x {
         memory_value := memory.get_at(mem, here)
         memory.set_register(mem, i, memory_value)
-        here += interpreter.STEP_SIZE
+        here += interpreter.NEXT_ADDR
     }
 }
 
