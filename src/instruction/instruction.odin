@@ -22,7 +22,7 @@ parse_from_bytes :: proc(command, arguments: byte) -> Instruction {
 
 debug_print :: proc(instr: ^Instruction) -> string {
     return fmt.aprintf(
-        "Instruction{{\n\tmost_significant_byte:\t%X\n\tx:\t\t\t%X\n\ty:\t\t\t%X\n\tnibble:\t\t\t%X\n\tkk_byte:\t\t%X\n\taddress:\t\t%X\n}}",
+        "Instruction{{\nmost_significant_byte: %X\nx: %X\ny: %X\nnibble: %X\nkk_byte: %X\naddress: %X\n}}",
         instr.most_significant_byte,
         instr.x,
         instr.y,
