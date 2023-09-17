@@ -109,6 +109,10 @@ step :: proc(
         set_register_to_random_byte_anded(mem, instr.x, instr.kk_byte)
     case 0xD:
         draw(scr, mem, instr.x, instr.y, instr.nibble)
+    case 0xE:
+        panic(fmt.aprintf("Unsupported instruction %#v", instr))
+    case 0xF:
+        panic(fmt.aprintf("Unsupported instruction %#v", instr))
     case:
         panic(
             fmt.aprintf(
