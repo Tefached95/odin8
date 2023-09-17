@@ -15,4 +15,4 @@ See the `programs` folder for other available programs.
 - [ ] Add support for keyboard input
 - [ ] Add support for the delay timer
 - [ ] Add support for the sound timer
-- [ ] Add support for importing your own program instead of having the maze hardcoded
+- [x] ~~Add support for importing your own program instead of having the maze hardcoded~~
