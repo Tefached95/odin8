@@ -14,20 +14,20 @@ step :: proc(
     mem: ^memory.Memory,
     scr: ^screen.Screen($W, $H),
 ) {
+    // sleep_ms(100)
     instr := interpreter.get_current_instruction(itp, mem)
 
     switch instr.most_significant_byte {
     case 0x0:
-        if (instr.kk_byte == 0xEE) {
+        switch instr.kk_byte {
+        case 0xEE:
             return_from_subroutine(itp, mem)
             return
-        }
-
-        if (instr.kk_byte == 0xE0) {
+        case 0xE0:
             screen.clear_screen(scr)
+        case:
+            sysaddr(itp)
         }
-
-        return
     case 0x1:
         itp.program_counter = instr.address
         return
@@ -83,7 +83,12 @@ step :: proc(
                 interpreter.Sub_Reversal.Standard,
             )
         case 0x6:
-            shift_register(mem, instr.x, interpreter.Shift_Direction.Right)
+            shift_register(
+                mem,
+                instr.x,
+                instr.y,
+                interpreter.Shift_Direction.Right,
+            )
         case 0x7:
             sub_registers(
                 mem,
@@ -92,7 +97,12 @@ step :: proc(
                 interpreter.Sub_Reversal.Reversed,
             )
         case 0xE:
-            shift_register(mem, instr.x, interpreter.Shift_Direction.Left)
+            shift_register(
+                mem,
+                instr.x,
+                instr.y,
+                interpreter.Shift_Direction.Left,
+            )
         }
     case 0x9:
         jump_if_registers_are_equal(
@@ -106,11 +116,13 @@ step :: proc(
         set_register_i_to_address(mem, instr.address)
     case 0xB:
         jump_to_v0_address(itp, mem, instr.address)
+        return
     case 0xC:
         set_register_to_random_byte_anded(mem, instr.x, instr.kk_byte)
     case 0xD:
         draw(scr, mem, instr.x, instr.y, instr.nibble)
     case 0xE:
+        panic("Not implemented")
     case 0xF:
         switch instr.kk_byte {
         case 0x1E:
@@ -119,6 +131,8 @@ step :: proc(
             spread_registers_into_memory(mem, instr.x)
         case 0x65:
             load_from_memory_into_registers(mem, instr.x)
+        case:
+            panic(fmt.aprintf("Unsupported argument %X", instr.kk_byte))
         }
     case:
         panic(
@@ -132,8 +146,8 @@ step :: proc(
     interpreter.increment_program_counter(itp)
 }
 
-sysaddr :: proc() {
-    // @TODO: should probably be ignored?
+sysaddr :: proc(itp: ^interpreter.Interpreter) {
+    return
 }
 
 call_subroutine :: proc(
@@ -358,23 +372,24 @@ sub_registers :: proc(
 // If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
 shift_register :: proc(
     mem: ^memory.Memory,
-    register_x: byte,
+    register_x, register_y: byte,
     shift_direction: interpreter.Shift_Direction,
 ) {
     vx := memory.get_register(mem, register_x)
+    vy := memory.get_register(mem, register_y)
 
     significant_bit, result: byte
 
     switch shift_direction {
-    case .Left:
-        significant_bit = vx << 1
-        result = vx * 2
     case .Right:
-        significant_bit = vx >> 1
-        result = vx / 2
+        result = vy >> 1
+        significant_bit = vx & 0x1
+    case .Left:
+        result = vy << 1
+        significant_bit = vx & 0x80
     }
 
-    memory.set_register(mem, 0xF, byte(significant_bit == 1 ? 1 : 0))
+    memory.set_register(mem, 0xF, significant_bit)
     memory.set_register(mem, register_x, result)
 }
 
