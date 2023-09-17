@@ -49,17 +49,17 @@ draw_sprite :: proc(
 ) -> bool {
     any_xord, row_xord: bool = false, false
 
-    for current_bool, index in data {
+    for byte_val, index in data {
         row_index := (y + byte(index)) % byte(screen.height)
 
         row_xord = xor_bool_range(
             &screen.pixels[row_index],
-            byte_to_bool_slice(current_bool),
+            byte_to_bool_slice(byte_val),
             int(x),
         )
 
         if !any_xord && row_xord {
-            any_xord = row_xord
+            any_xord = true
         }
     }
 
@@ -67,35 +67,30 @@ draw_sprite :: proc(
 }
 
 xor_bool_range :: proc(target: ^[$W]bool, source: []bool, start: int) -> bool {
-    xord := false
+    unset := false
     target_length := len(target^)
 
     for pixel, index in source {
         actual_index := (start + index) % target_length
-        state, unset := boolean_xor(target[actual_index], pixel)
+        old_state := target[actual_index]
+        new_state := boolean_xor(target[actual_index], pixel)
 
-        if !xord && unset {
-            xord = true
+        if !unset && (old_state == true && new_state == false) {
+            unset = true
         }
 
-        (target^)[actual_index] = state
+        (target^)[actual_index] = new_state
     }
 
-    return xord
+    return unset
 }
 
-boolean_xor :: proc(a, b: bool) -> (state, unset: bool) {
-    state = a != b
-    unset = a && b
-
-    return
+boolean_xor :: proc(a, b: bool) -> bool {
+    return a != b
 }
 
 byte_to_bool_slice :: proc(n: byte) -> (bool_slice: []bool) {
-    builder := strings.builder_make()
-    defer strings.builder_destroy(&builder)
-
-    byte_as_string := fmt.sbprintf(&builder, "%08b", n)
+    byte_as_string := fmt.aprintf("%08b", n)
 
     bool_slice = make([]bool, 8)
     for char, index in byte_as_string {
