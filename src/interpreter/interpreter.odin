@@ -64,9 +64,11 @@ get_current_instruction :: proc(
     instr, ok := &itp.instruction_cache[cache_key]
 
     if ok == false {
-        panic(
-            fmt.aprintf("No instruction found for cache key %v\n", cache_key),
+        new_instr := new_clone(
+            instruction.parse_from_bytes(command_byte, argument_byte),
         )
+        itp.instruction_cache[cache_key] = new_instr^
+        return new_instr
     }
 
     return instr
