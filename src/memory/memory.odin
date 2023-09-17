@@ -42,6 +42,10 @@ get_at :: proc(mem: ^Memory, addr: u16) -> byte {
     return mem.ram[int(addr)]
 }
 
+set_at :: proc(mem: ^Memory, addr: u16, value: byte) {
+    mem.ram[int(addr)] = value
+}
+
 get_range :: proc(mem: ^Memory, start: u16, length: int) -> []byte {
     // TODO: add bounds checking
     return mem.ram[start:(int(start) + length)]

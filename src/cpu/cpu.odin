@@ -4,6 +4,7 @@ import "core:fmt"
 import rnd "core:math/rand"
 import "core:time"
 
+import instruction "odin8:instruction"
 import interpreter "odin8:interpreter"
 import memory "odin8:memory"
 import screen "odin8:screen"
@@ -110,14 +111,20 @@ step :: proc(
     case 0xD:
         draw(scr, mem, instr.x, instr.y, instr.nibble)
     case 0xE:
-        panic(fmt.aprintf("Unsupported instruction %#v", instr))
     case 0xF:
-        panic(fmt.aprintf("Unsupported instruction %#v", instr))
+        switch instr.kk_byte {
+        case 0x1E:
+            increment_i_by_vx(mem, instr.x)
+        case 0x55:
+            spread_registers_into_memory(mem, instr.x)
+        case 0x65:
+            load_from_memory_into_registers(mem, instr.x)
+        }
     case:
         panic(
             fmt.aprintf(
-                "Unexpected command byte %X",
-                instr.most_significant_byte,
+                "Unsupported instruction %s",
+                instruction.debug_print(instr),
             ),
         )
     }
@@ -435,6 +442,37 @@ draw :: proc(
     }
 
     screen.draw_screen(scr)
+}
+
+// ### Fx1E - ADD I, Vx
+//
+// Set I = I + Vx.
+//
+// The values of I and Vx are added, and the results are stored in I.
+increment_i_by_vx :: proc(mem: ^memory.Memory, register_x: byte) {
+    vx_value := memory.get_register(mem, register_x)
+    mem.register_i += u16(vx_value)
+}
+
+spread_registers_into_memory :: proc(mem: ^memory.Memory, register_x: byte) {
+    here := mem.register_i
+    for i in 0 ..= register_x {
+        register_value := memory.get_register(mem, i)
+        memory.set_at(mem, (here), register_value)
+        here += interpreter.STEP_SIZE
+    }
+}
+
+load_from_memory_into_registers :: proc(
+    mem: ^memory.Memory,
+    register_x: byte,
+) {
+    here := mem.register_i
+    for i in 0 ..= register_x {
+        memory_value := memory.get_at(mem, here)
+        memory.set_register(mem, i, memory_value)
+        here += interpreter.STEP_SIZE
+    }
 }
 
 @(private)
