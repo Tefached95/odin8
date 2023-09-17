@@ -8,13 +8,18 @@ import interpreter "odin8:interpreter"
 import memory "odin8:memory"
 import screen "odin8:screen"
 
-FILENAME :: "./programs/maze.ch8"
-
 main :: proc() {
-    file, ok := os.read_entire_file_from_filename(FILENAME)
+    args := os.args
+    if (len(args) == 1) {
+        fmt.printf("Usage: ./odin8 <path_to_ch8_file>\n")
+        return
+    }
+
+    program_path := args[1]
+    file, ok := os.read_entire_file_from_filename(program_path)
 
     if ok == false {
-        panic(fmt.aprintf("Failed reading from %s.", FILENAME))
+        panic(fmt.aprintf("Failed reading from %s.", program_path))
     }
 
     scr := screen.make_screen(64, 32)

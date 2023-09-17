@@ -7,7 +7,9 @@ Make sure you have the Odin compiler set up and visible in your `PATH`. [See her
 
 `$ make build`
 
-`$ ./odin8`
+`$ ./odin8 ./programs/maze.ch8`
+
+See the `programs` folder for other available programs.
 
 ## TODOs
 - [ ] Add support for keyboard input
