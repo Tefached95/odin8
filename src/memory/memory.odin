@@ -4,7 +4,7 @@ MEMORY_START :: 0x200
 MEMORY_END :: 0xFFF
 
 Program_Stack :: struct {
-    stack:   []u16,
+    stack:   [16]u16,
     pointer: u16,
 }
 
@@ -17,7 +17,7 @@ Memory :: struct {
 }
 
 make_memory :: proc() -> ^Memory {
-    ps := new_clone(Program_Stack{stack = []u16{}, pointer = 0x0000})
+    ps := new_clone(Program_Stack{stack = [16]u16{}, pointer = 0x0000})
 
     return new_clone(
         Memory{
