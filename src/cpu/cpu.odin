@@ -14,7 +14,6 @@ step :: proc(
     mem: ^memory.Memory,
     scr: ^screen.Screen($W, $H),
 ) {
-    // sleep_ms(100)
     instr := interpreter.get_current_instruction(itp, mem)
 
     switch instr.most_significant_byte {
@@ -179,11 +178,11 @@ cls :: proc(scr: ^screen.Screen) {
 //
 // The interpreter compares register Vx to kk, and if they are equal, increments the program counter by 2.
 //
-// ### 9xy0 - SNE Vx, Vy
+// ### 4xkk - SNE Vx, byte
 //
-// Skip next instruction if Vx != Vy.
+// Skip next instruction if Vx != kk.
 //
-// The values of Vx and Vy are compared, and if they are not equal, the program counter is increased by 2.
+// The interpreter compares register Vx to kk, and if they are not equal, increments the program counter by 2.
 skip_check_equality :: proc(
     itp: ^interpreter.Interpreter,
     mem: ^memory.Memory,
@@ -473,8 +472,7 @@ spread_registers_into_memory :: proc(mem: ^memory.Memory, register_x: byte) {
     here := mem.register_i
     for i in 0 ..= register_x {
         register_value := memory.get_register(mem, i)
-        memory.set_at(mem, (here), register_value)
-        here += interpreter.NEXT_ADDR
+        memory.set_at(mem, (here + u16(i)), register_value)
     }
 
     mem.register_i = mem.register_i + u16(register_x) + interpreter.NEXT_ADDR
@@ -486,9 +484,8 @@ load_from_memory_into_registers :: proc(
 ) {
     here := mem.register_i
     for i in 0 ..= register_x {
-        memory_value := memory.get_at(mem, here)
+        memory_value := memory.get_at(mem, (here + u16(i)))
         memory.set_register(mem, i, memory_value)
-        here += interpreter.NEXT_ADDR
     }
 
     mem.register_i = mem.register_i + u16(register_x) + interpreter.NEXT_ADDR
