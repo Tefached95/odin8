@@ -36,7 +36,7 @@ make_interpreter :: proc(mem: ^memory.Memory) -> ^Interpreter {
     sb := strings.builder_make()
     defer strings.builder_destroy(&sb)
 
-    cache := make(map[string]instruction.Instruction, mem.program_length / 2)
+    cache := make(map[string]instruction.Instruction, mem.program_length)
     populate_instruction_cache(&sb, mem, &cache)
 
     itp := new_clone(
@@ -92,7 +92,7 @@ populate_instruction_cache :: proc(
     mem: ^memory.Memory,
     cache: ^map[string]instruction.Instruction,
 ) {
-    for i := 0; i < mem.program_length; i += STEP_SIZE {
+    for i := 0; i < mem.program_length; i += NEXT_ADDR {
         command_byte := memory.get_at(mem, (u16(i) + memory.MEMORY_START))
         argument_byte := memory.get_at(
             mem,
