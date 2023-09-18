@@ -50,7 +50,7 @@ step :: proc(
             interpreter.Equality.Neq,
         )
     case 0x5:
-        jump_if_registers_are_equal(
+        skip_check_register_equality(
             itp,
             mem,
             instr.x,
@@ -104,7 +104,7 @@ step :: proc(
             )
         }
     case 0x9:
-        jump_if_registers_are_equal(
+        skip_check_register_equality(
             itp,
             mem,
             instr.x,
@@ -213,7 +213,7 @@ skip_check_equality :: proc(
 // Skip next instruction if Vx != Vy.
 //
 // The values of Vx and Vy are compared, and if they are not equal, the program counter is increased by 2.
-jump_if_registers_are_equal :: proc(
+skip_check_register_equality :: proc(
     itp: ^interpreter.Interpreter,
     mem: ^memory.Memory,
     register_x, register_y: byte,
