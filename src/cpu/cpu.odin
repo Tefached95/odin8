@@ -355,13 +355,13 @@ sub_registers :: proc(
 //
 // Set Vx = Vx SHR 1.
 //
-// If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
+// If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is shifted right one bit.
 //
 // ### 8xyE - SHL Vx {, Vy}
 //
 // Set Vx = Vx SHL 1.
 //
-// If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
+// If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is shifted left one bit.
 shift_register :: proc(
     mem: ^memory.Memory,
     register_x: byte,
