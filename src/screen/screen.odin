@@ -30,10 +30,7 @@ draw_screen :: proc(screen: ^Screen($W, $H)) {
 
     for y in 0 ..< screen.height {
         for x in 0 ..< screen.width {
-            fmt.sbprint(
-                &string_builder,
-                (screen.pixels[y][x] ? "██" : " "),
-            )
+            fmt.sbprint(&string_builder, (screen.pixels[y][x] ? "█" : " "))
         }
         fmt.sbprint(&string_builder, "\n")
     }
