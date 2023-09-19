@@ -33,6 +33,10 @@ make_memory :: proc() -> ^Memory {
     )
 }
 
+load_font_data :: proc(mem: ^Memory) {
+
+}
+
 load_program_into_memory :: proc(program_memory: ^Memory, program: []byte) {
     for value, index in program {
         program_memory.ram[index + MEMORY_START] = value
