@@ -467,7 +467,7 @@ spread_registers_into_memory :: proc(mem: ^memory.Memory, register_x: byte) {
         memory.set_at(mem, (here + u16(i)), register_value)
     }
 
-    mem.register_i = mem.register_i + u16(register_x) + interpreter.NEXT_ADDR
+    // mem.register_i = mem.register_i + u16(register_x) + interpreter.NEXT_ADDR
 }
 
 load_from_memory_into_registers :: proc(
@@ -480,7 +480,7 @@ load_from_memory_into_registers :: proc(
         memory.set_register(mem, i, memory_value)
     }
 
-    mem.register_i = mem.register_i + u16(register_x) + interpreter.NEXT_ADDR
+    // mem.register_i = mem.register_i + u16(register_x) + interpreter.NEXT_ADDR
 }
 
 @(private)
