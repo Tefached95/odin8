@@ -14,6 +14,7 @@ step :: proc(
     mem: ^memory.Memory,
     scr: ^screen.Screen($W, $H),
 ) {
+    // sleep_ms(33)
     instr := interpreter.get_current_instruction(itp, mem)
 
     switch instr.most_significant_byte {
@@ -82,12 +83,7 @@ step :: proc(
                 interpreter.Sub_Reversal.Standard,
             )
         case 0x6:
-            shift_register(
-                mem,
-                instr.x,
-                instr.y,
-                interpreter.Shift_Direction.Right,
-            )
+            shift_register(mem, instr.x, interpreter.Shift_Direction.Right)
         case 0x7:
             sub_registers(
                 mem,
@@ -96,12 +92,9 @@ step :: proc(
                 interpreter.Sub_Reversal.Reversed,
             )
         case 0xE:
-            shift_register(
-                mem,
-                instr.x,
-                instr.y,
-                interpreter.Shift_Direction.Left,
-            )
+            shift_register(mem, instr.x, interpreter.Shift_Direction.Left)
+        case:
+            panic(fmt.aprintf("Unsupported nibble %X\n", instr.nibble))
         }
     case 0x9:
         skip_check_register_equality(
@@ -256,7 +249,7 @@ increment_register_by_value :: proc(
     value: byte,
 ) {
     sum := memory.get_register(mem, register) + value
-    memory.set_register(mem, register, (sum % 0xFF))
+    memory.set_register(mem, register, (sum & 0xFF))
 }
 
 
@@ -326,7 +319,7 @@ add_registers :: proc(mem: ^memory.Memory, register_x, register_y: byte) {
 
     carry := result > 0xFF ? 1 : 0
 
-    memory.set_register(mem, register_x, (result % 0xFF))
+    memory.set_register(mem, register_x, (result & 0xFF))
     memory.set_register(mem, 0xF, byte(carry))
 }
 
@@ -371,21 +364,20 @@ sub_registers :: proc(
 // If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
 shift_register :: proc(
     mem: ^memory.Memory,
-    register_x, register_y: byte,
+    register_x: byte,
     shift_direction: interpreter.Shift_Direction,
 ) {
     vx := memory.get_register(mem, register_x)
-    vy := memory.get_register(mem, register_y)
 
     significant_bit, result: byte
 
     switch shift_direction {
     case .Right:
-        result = vy >> 1
         significant_bit = vx & 0x1
+        result = vx >> 1
     case .Left:
-        result = vy << 1
-        significant_bit = vx & 0x80
+        significant_bit = byte(i8(vx) < 0) //cheaty way to get msb
+        result = vx << 1
     }
 
     memory.set_register(mem, 0xF, significant_bit)
