@@ -30,7 +30,10 @@ draw_screen :: proc(screen: ^Screen($W, $H)) {
 
     for y in 0 ..< screen.height {
         for x in 0 ..< screen.width {
-            fmt.sbprint(&string_builder, (screen.pixels[y][x] ? "x" : " "))
+            fmt.sbprint(
+                &string_builder,
+                (screen.pixels[y][x] ? "██" : " "),
+            )
         }
         fmt.sbprint(&string_builder, "\n")
     }
@@ -68,25 +71,19 @@ draw_sprite :: proc(
 
 xor_bool_range :: proc(target: ^[$W]bool, source: []bool, start: int) -> bool {
     unset := false
-    target_length := len(target^)
 
     for pixel, index in source {
-        actual_index := (start + index) % target_length
+        actual_index := (start + index) % len(target^)
         old_state := target[actual_index]
-        new_state := boolean_xor(target[actual_index], pixel)
+        new_state := target[actual_index] ~ pixel
+        (target^)[actual_index] = new_state
 
         if !unset && (old_state == true && new_state == false) {
             unset = true
         }
-
-        (target^)[actual_index] = new_state
     }
 
     return unset
-}
-
-boolean_xor :: proc(a, b: bool) -> bool {
-    return a != b
 }
 
 byte_to_bool_slice :: proc(n: byte) -> (bool_slice: []bool) {
