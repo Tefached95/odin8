@@ -5,11 +5,6 @@ FONT_SIZE :: 0x5
 MEMORY_START :: 0x200
 MEMORY_END :: 0xFFF
 
-Program_Stack :: struct {
-    stack:   [16]u16,
-    pointer: u16,
-}
-
 Memory :: struct {
     ram:                [4096]byte,
     registers:          [16]byte,
