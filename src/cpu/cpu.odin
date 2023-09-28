@@ -390,10 +390,7 @@ shift_register :: proc(
 // Set I = nnn.
 //
 // The value of register I is set to nnn.
-set_register_i_to_address :: #force_inline proc(
-    mem: ^memory.Memory,
-    address: u16,
-) {
+set_register_i_to_address :: proc(mem: ^memory.Memory, address: u16) {
     mem.register_i = address
 }
 

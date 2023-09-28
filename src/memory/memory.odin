@@ -55,16 +55,10 @@ get_range :: proc(mem: ^Memory, start: u16, length: int) -> []byte {
     return mem.ram[start:(int(start) + length)]
 }
 
-set_register :: #force_inline proc(
-    program_memory: ^Memory,
-    register, value: byte,
-) {
+set_register :: proc(program_memory: ^Memory, register, value: byte) {
     program_memory.registers[register] = value
 }
 
-get_register :: #force_inline proc(
-    program_memory: ^Memory,
-    register: byte,
-) -> byte {
+get_register :: proc(program_memory: ^Memory, register: byte) -> byte {
     return program_memory.registers[register]
 }
