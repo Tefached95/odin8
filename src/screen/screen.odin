@@ -1,6 +1,7 @@
 package screen
 
 import fmt "core:fmt"
+import math "core:math"
 import strings "core:strings"
 
 Screen :: struct($W, $H: int) {
@@ -47,40 +48,37 @@ draw_sprite :: proc(
     x, y: byte,
     data: []byte,
 ) -> bool {
-    any_xord, row_xord: bool = false, false
+    collision := false
 
-    for byte_val, index in data {
-        row_index := (y + byte(index)) % byte(screen.height)
+    coord_x := int(x) % screen.width
+    coord_y := int(y) % screen.height
 
-        row_xord = xor_bool_range(
-            &screen.pixels[row_index],
-            byte_to_bool_slice(byte_val),
-            int(x),
-        )
+    current_sprite_row := 0
+    current_row_pixel := 0
 
-        if !any_xord && row_xord {
-            any_xord = true
+    row_max := coord_y + math.min(len(data), screen.height - coord_y)
+    col_max := coord_x + math.min(8, screen.width - coord_x)
+
+    for row in coord_y ..< row_max {
+        pixels := byte_to_bool_slice(data[current_sprite_row])
+
+        for col in coord_x ..< col_max {
+            current_pixel := screen.pixels[row][col]
+            new_pixel := current_pixel ~ pixels[current_row_pixel]
+
+            if current_pixel && !new_pixel {
+                collision = true
+            }
+
+            screen.pixels[row][col] = new_pixel
+
+            current_row_pixel += 1
         }
+        current_row_pixel = 0
+        current_sprite_row += 1
     }
 
-    return any_xord
-}
-
-xor_bool_range :: proc(target: ^[$W]bool, source: []bool, start: int) -> bool {
-    unset := false
-
-    for pixel, index in source {
-        actual_index := (start + index) % len(target^)
-        old_state := target[actual_index]
-        new_state := target[actual_index] ~ pixel
-        (target^)[actual_index] = new_state
-
-        if !unset && (old_state == true && new_state == false) {
-            unset = true
-        }
-    }
-
-    return unset
+    return collision
 }
 
 byte_to_bool_slice :: proc(n: byte) -> (bool_slice: []bool) {
