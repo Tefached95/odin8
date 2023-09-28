@@ -340,10 +340,10 @@ sub_registers :: proc(
 
     switch reversed {
     case .Standard:
-        borrow = vx > vy ? 1 : 0
+        borrow = vx < vy ? 1 : 0
         result = vx - vy
     case .Reversed:
-        borrow = vx < vy ? 1 : 0
+        borrow = vx > vy ? 1 : 0
         result = vy - vx
     }
 
