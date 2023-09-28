@@ -9,26 +9,23 @@ Program_Stack :: struct {
 }
 
 Memory :: struct {
-    ram:            [4096]byte,
-    registers:      [16]byte,
-    register_i:     u16,
-    program_length: int,
-    program_stack:  Program_Stack,
+    ram:                [4096]byte,
+    registers:          [16]byte,
+    register_i:         u16,
+    program_length:     int,
+    subroutine_stack:   [16]u16,
+    subroutine_pointer: u16,
 }
 
 make_memory :: proc() -> ^Memory {
-    ps := Program_Stack {
-        stack = [16]u16{},
-        pointer = 0x0000,
-    }
-
     return new_clone(
         Memory{
             ram = [4096]byte{},
             registers = [16]byte{},
             register_i = 0x00,
             program_length = 0,
-            program_stack = ps,
+            subroutine_stack = [16]u16{},
+            subroutine_pointer = 0x0000,
         },
     )
 }
