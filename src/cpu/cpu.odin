@@ -364,20 +364,21 @@ sub_registers :: proc(
 // If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is shifted left one bit.
 shift_register :: proc(
     mem: ^memory.Memory,
-    register_x: byte,
+    register_x, register_y: byte,
     shift_direction: interpreter.Shift_Direction,
 ) {
     vx := memory.get_register(mem, register_x)
+    vy := memory.get_register(mem, register_y)
 
     significant_bit, result: byte
 
     switch shift_direction {
     case .Right:
-        significant_bit = vx & 0x1
-        result = vx >> 1
+        significant_bit = vy & 0x1
+        result = vy >> 1
     case .Left:
-        significant_bit = byte(i8(vx) < 0) //cheaty way to get msb
-        result = vx << 1
+        significant_bit = vy << 7
+        result = vy << 1
     }
 
     memory.set_register(mem, 0xF, significant_bit)
