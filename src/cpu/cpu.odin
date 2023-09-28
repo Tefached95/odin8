@@ -83,7 +83,12 @@ step :: proc(
                 interpreter.Sub_Reversal.Standard,
             )
         case 0x6:
-            shift_register(mem, instr.x, interpreter.Shift_Direction.Right)
+            shift_register(
+                mem,
+                instr.x,
+                instr.y,
+                interpreter.Shift_Direction.Right,
+            )
         case 0x7:
             sub_registers(
                 mem,
@@ -92,7 +97,12 @@ step :: proc(
                 interpreter.Sub_Reversal.Reversed,
             )
         case 0xE:
-            shift_register(mem, instr.x, interpreter.Shift_Direction.Left)
+            shift_register(
+                mem,
+                instr.x,
+                instr.y,
+                interpreter.Shift_Direction.Left,
+            )
         case:
             panic(fmt.aprintf("Unsupported nibble %X\n", instr.nibble))
         }
