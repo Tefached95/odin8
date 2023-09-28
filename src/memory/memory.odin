@@ -1,5 +1,7 @@
 package memory
 
+FONT_START :: 0x50
+FONT_SIZE :: 0x5
 MEMORY_START :: 0x200
 MEMORY_END :: 0xFFF
 
@@ -29,21 +31,110 @@ make_memory :: proc() -> ^Memory {
             subroutine_stack = [16]u16{},
             subroutine_pointer = 0x0,
             delay_timer = 0x0,
-            sound_timer = 0x0
+            sound_timer = 0x0,
         },
     )
 }
 
 load_font_data :: proc(mem: ^Memory) {
-
-}
-
-load_program_into_memory :: proc(program_memory: ^Memory, program: []byte) {
-    for value, index in program {
-        program_memory.ram[index + MEMORY_START] = value
+    font_set := []u8{
+        0xF0,
+        0x90,
+        0x90,
+        0x90,
+        0xF0,
+        0x20,
+        0x60,
+        0x20,
+        0x20,
+        0x70,
+        0xF0,
+        0x10,
+        0xF0,
+        0x80,
+        0xF0,
+        0xF0,
+        0x10,
+        0xF0,
+        0x10,
+        0xF0,
+        0x90,
+        0x90,
+        0xF0,
+        0x10,
+        0x10,
+        0xF0,
+        0x80,
+        0xF0,
+        0x10,
+        0xF0,
+        0xF0,
+        0x80,
+        0xF0,
+        0x90,
+        0xF0,
+        0xF0,
+        0x10,
+        0x20,
+        0x40,
+        0x40,
+        0xF0,
+        0x90,
+        0xF0,
+        0x90,
+        0xF0,
+        0xF0,
+        0x90,
+        0xF0,
+        0x10,
+        0xF0,
+        0xF0,
+        0x90,
+        0xF0,
+        0x90,
+        0x90,
+        0xE0,
+        0x90,
+        0xE0,
+        0x90,
+        0xE0,
+        0xF0,
+        0x80,
+        0x80,
+        0x80,
+        0xF0,
+        0xE0,
+        0x90,
+        0x90,
+        0x90,
+        0xE0,
+        0xF0,
+        0x80,
+        0xF0,
+        0x80,
+        0xF0,
+        0xF0,
+        0x80,
+        0xF0,
+        0x80,
+        0x80,
     }
 
-    program_memory.program_length = len(program)
+    font_offset: u8 = FONT_START
+
+    for element in font_set {
+        mem.ram[font_offset & 0xFF] = element
+        font_offset += 1
+    }
+}
+
+load_program_into_memory :: proc(mem: ^Memory, program: []byte) {
+    load_font_data(mem)
+    for value, index in program {
+        mem.ram[index + MEMORY_START] = value
+    }
+
+    mem.program_length = len(program)
 }
 
 get_at :: proc(mem: ^Memory, addr: u16) -> byte {
