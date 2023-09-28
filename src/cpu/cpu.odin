@@ -157,8 +157,8 @@ call_subroutine :: proc(
     mem: ^memory.Memory,
     address: u16,
 ) {
-    mem.program_stack.pointer += 1
-    mem.program_stack.stack[mem.program_stack.pointer] = itp.program_counter
+    mem.subroutine_pointer += 1
+    mem.subroutine_stack[mem.subroutine_pointer] = itp.program_counter
 
     itp.program_counter = address
 }
@@ -167,8 +167,8 @@ return_from_subroutine :: proc(
     itp: ^interpreter.Interpreter,
     mem: ^memory.Memory,
 ) {
-    itp.program_counter = mem.program_stack.stack[mem.program_stack.pointer]
-    mem.program_stack.pointer -= 1
+    itp.program_counter = mem.subroutine_stack[mem.subroutine_pointer]
+    mem.subroutine_pointer -= 1
 }
 
 cls :: proc(scr: ^screen.Screen) {
