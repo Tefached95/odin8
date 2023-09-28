@@ -179,7 +179,7 @@ cls :: proc(scr: ^screen.Screen) {
 skip_check_equality :: proc(
     itp: ^interpreter.Interpreter,
     mem: ^memory.Memory,
-    register: u8,
+    register: byte,
     value: byte,
     comp: interpreter.Equality,
 ) {
