@@ -18,8 +18,8 @@ Sub_Reversal :: enum {
     Reversed,
 }
 Bitwise_Op :: enum byte {
-    And = 0x1,
-    Or  = 0x2,
+    Or  = 0x1,
+    And = 0x2,
     Xor = 0x3,
 }
 Shift_Direction :: enum {
