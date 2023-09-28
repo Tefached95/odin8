@@ -127,6 +127,10 @@ step :: proc(
         panic("Not implemented")
     case 0xF:
         switch instr.kk_byte {
+        case 0x07:
+            set_vx_to_delay_timer(mem, instr.x)
+        case 0x15:
+            set_delay_timer_to_vx(mem, instr.x)
         case 0x1E:
             increment_i_by_vx(mem, instr.x)
         case 0x55:
@@ -145,6 +149,7 @@ step :: proc(
         )
     }
 
+    mem.delay_timer -= 1
     interpreter.increment_program_counter(itp)
 }
 
@@ -259,7 +264,7 @@ increment_register_by_value :: proc(
     value: byte,
 ) {
     sum := memory.get_register(mem, register) + value
-    memory.set_register(mem, register, (sum & 0xFF))
+    memory.set_register(mem, register, sum)
 }
 
 
@@ -341,19 +346,19 @@ add_registers :: proc(mem: ^memory.Memory, register_x, register_y: byte) {
 sub_registers :: proc(
     mem: ^memory.Memory,
     register_x, register_y: byte,
-    reversed: interpreter.Sub_Reversal,
+    reversal: interpreter.Sub_Reversal,
 ) {
     vx := memory.get_register(mem, register_x)
     vy := memory.get_register(mem, register_y)
 
     borrow, result: byte
 
-    switch reversed {
+    switch reversal {
     case .Standard:
-        borrow = vx < vy ? 1 : 0
+        borrow = vx > vy ? 1 : 0
         result = vx - vy
     case .Reversed:
-        borrow = vx > vy ? 1 : 0
+        borrow = vy > vx ? 1 : 0
         result = vy - vx
     }
 
@@ -387,7 +392,7 @@ shift_register :: proc(
         significant_bit = vy & 0x1
         result = vy >> 1
     case .Left:
-        significant_bit = vy << 7
+        significant_bit = vy >> 7
         result = vy << 1
     }
 
@@ -401,7 +406,7 @@ shift_register :: proc(
 //
 // The value of register I is set to nnn.
 set_register_i_to_address :: proc(mem: ^memory.Memory, address: u16) {
-    mem.register_i = address
+    mem.register_i = address & 0xFFF
 }
 
 // ### Bnnn - JP V0, addr
@@ -427,7 +432,8 @@ set_register_to_random_byte_anded :: proc(
     mem: ^memory.Memory,
     register_x, kk_byte: byte,
 ) {
-    rand := u8(rnd.uint32() & 0xFF) & kk_byte
+    rng := rnd.create(u64(time.to_unix_nanoseconds(time.now())))
+    rand := u8(rnd.uint32(&rng) & 0xFF) & kk_byte
     memory.set_register(mem, register_x, rand)
 }
 
@@ -458,6 +464,14 @@ draw :: proc(
     screen.draw_screen(scr)
 }
 
+set_vx_to_delay_timer :: proc(mem: ^memory.Memory, register_x: byte) {
+    memory.set_register(mem, register_x, mem.delay_timer)
+}
+
+set_delay_timer_to_vx :: proc(mem: ^memory.Memory, register_x: byte) {
+    mem.delay_timer = memory.get_register(mem, register_x)
+}
+
 // ### Fx1E - ADD I, Vx
 //
 // Set I = I + Vx.
@@ -465,7 +479,11 @@ draw :: proc(
 // The values of I and Vx are added, and the results are stored in I.
 increment_i_by_vx :: proc(mem: ^memory.Memory, register_x: byte) {
     vx_value := memory.get_register(mem, register_x)
-    mem.register_i += u16(vx_value)
+    res := mem.register_i + u16(vx_value)
+    carry := res > 0xFFF
+
+    mem.register_i = res & 0xFFF
+    memory.set_register(mem, 0xF, byte(carry))
 }
 
 spread_registers_into_memory :: proc(mem: ^memory.Memory, register_x: byte) {
