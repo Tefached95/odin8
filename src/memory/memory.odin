@@ -15,6 +15,8 @@ Memory :: struct {
     program_length:     int,
     subroutine_stack:   [16]u16,
     subroutine_pointer: u16,
+    delay_timer:        u8,
+    sound_timer:        u8,
 }
 
 make_memory :: proc() -> ^Memory {
@@ -25,7 +27,9 @@ make_memory :: proc() -> ^Memory {
             register_i = 0x00,
             program_length = 0,
             subroutine_stack = [16]u16{},
-            subroutine_pointer = 0x0000,
+            subroutine_pointer = 0x0,
+            delay_timer = 0x0,
+            sound_timer = 0x0
         },
     )
 }
