@@ -176,10 +176,6 @@ return_from_subroutine :: proc(
     mem.subroutine_pointer -= 1
 }
 
-cls :: proc(scr: ^screen.Screen) {
-    screen.clear_screen(scr)
-}
-
 // ### 3xkk - SE Vx, byte
 //
 // Skip next instruction if Vx = kk.
