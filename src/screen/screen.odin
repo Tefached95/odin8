@@ -39,8 +39,12 @@ draw_screen :: proc(screen: ^Screen($W, $H)) {
     fmt.println(strings.to_string(string_builder))
 }
 
-clear_screen :: proc(screen: ^Screen($W, $H)) {
-    fmt.print("\033c")
+clear_screen :: proc(scr: ^Screen($W, $H)) {
+    for y in 0 ..< scr.height {
+        for x in 0 ..< scr.width {
+            scr.pixels[y][x] = false
+        }
+    }
 }
 
 draw_sprite :: proc(
