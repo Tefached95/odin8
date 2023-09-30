@@ -2,6 +2,7 @@ package screen
 
 import fmt "core:fmt"
 import math "core:math"
+import slice "core:slice"
 import strings "core:strings"
 
 Screen :: struct($W, $H: int) {
@@ -85,13 +86,14 @@ draw_sprite :: proc(
     return collision
 }
 
-byte_to_bool_slice :: proc(n: byte) -> (bool_slice: []bool) {
-    byte_as_string := fmt.aprintf("%08b", n)
+byte_to_bool_slice :: proc(n: byte) -> []bool {
+    bool_slice := make([]bool, 8)
 
-    bool_slice = make([]bool, 8)
-    for char, index in byte_as_string {
-        bool_slice[index] = char != '0'
+    for i in 0 ..< 8 {
+        bool_slice[i] = (n >> u8(i)) & 0x1 == 1
     }
 
-    return
+    slice.reverse(bool_slice)
+
+    return bool_slice
 }
