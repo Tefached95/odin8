@@ -5,7 +5,7 @@ This is a simple Chip8 emulator written in Odin as an exercise in both emulation
 ## Compile
 Make sure you have the Odin compiler set up and visible in your `PATH`. [See here for more info.](https://odin-lang.org/docs/install/)
 
-`$ make build`
+`$ make`
 
 `$ ./odin8 ./programs/maze.ch8`
 
