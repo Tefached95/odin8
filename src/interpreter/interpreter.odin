@@ -27,9 +27,11 @@ Shift_Direction :: enum {
     Right,
 }
 
+Instruction_Cache :: map[u16]instruction.Instruction
+
 Interpreter :: struct {
     program_counter:           u16,
-    instruction_cache:         map[string]instruction.Instruction,
+    instruction_cache:         Instruction_Cache,
     // PROCS
     get_current_instruction:   proc(
         itp: ^Interpreter,
@@ -39,11 +41,8 @@ Interpreter :: struct {
 }
 
 make_interpreter :: proc(mem: ^memory.Memory) -> ^Interpreter {
-    sb := strings.builder_make()
-    defer strings.builder_destroy(&sb)
-
-    cache := make(map[string]instruction.Instruction, mem.program_length)
-    populate_instruction_cache(&sb, mem, &cache)
+    cache := make(Instruction_Cache, mem.program_length)
+    populate_instruction_cache(mem, &cache)
 
     itp := new_clone(
         Interpreter{
@@ -67,7 +66,7 @@ get_current_instruction :: proc(
     command_byte := memory.get_at(mem, itp.program_counter)
     argument_byte := memory.get_at(mem, itp.program_counter + NEXT_ADDR)
 
-    cache_key := bytes_to_cache_key(&sb, command_byte, argument_byte)
+    cache_key := instruction.be_bytes_to_u16(command_byte, argument_byte)
 
     instr, ok := &itp.instruction_cache[cache_key]
 
@@ -82,23 +81,10 @@ get_current_instruction :: proc(
     return instr
 }
 
-bytes_to_cache_key :: proc(sb: ^strings.Builder, b1, b2: byte) -> string {
-    defer strings.builder_reset(sb)
-
-    fmt.sbprintf(sb, "%X%X", b1, b2)
-
-    cache_key, err := strings.clone(strings.to_string(sb^))
-    if err != nil {
-        panic(fmt.aprintf("Could not clone cache key."))
-    }
-
-    return cache_key
-}
 
 populate_instruction_cache :: proc(
-    sb: ^strings.Builder,
     mem: ^memory.Memory,
-    cache: ^map[string]instruction.Instruction,
+    cache: ^Instruction_Cache,
 ) {
     for i := 0; i < mem.program_length; i += NEXT_ADDR {
         command_byte := memory.get_at(mem, (u16(i) + memory.MEMORY_START))
@@ -107,7 +93,7 @@ populate_instruction_cache :: proc(
             (u16(i) + memory.MEMORY_START) + NEXT_ADDR,
         )
 
-        cache_key := bytes_to_cache_key(sb, command_byte, argument_byte)
+        cache_key := instruction.be_bytes_to_u16(command_byte, argument_byte)
 
         instr := instruction.parse_from_bytes(command_byte, argument_byte)
         (cache^)[cache_key] = instr

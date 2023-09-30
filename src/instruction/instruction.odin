@@ -32,7 +32,6 @@ debug_print :: proc(instr: ^Instruction) -> string {
     )
 }
 
-@(private)
 be_bytes_to_u16 :: proc(first, second: byte) -> u16 {
     return u16(second) | u16(first) << 8
 }
