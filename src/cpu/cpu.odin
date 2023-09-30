@@ -194,7 +194,7 @@ skip_check_equality :: proc(
     value: byte,
     comp: interpreter.Equality,
 ) {
-    value_x := memory.get_register(mem, register)
+    value_x := mem->get_register(register)
     equal := value_x == value
 
     switch comp {
@@ -223,8 +223,8 @@ skip_check_register_equality :: proc(
     register_x, register_y: byte,
     comp: interpreter.Equality,
 ) {
-    value_x := memory.get_register(mem, register_x)
-    value_y := memory.get_register(mem, register_y)
+    value_x := mem->get_register(register_x)
+    value_y := mem->get_register(register_y)
 
     equal := value_x == value_y
 
@@ -246,7 +246,7 @@ set_register_to_value :: proc(
     register: byte,
     value: byte,
 ) {
-    memory.set_register(mem, register, value)
+    mem->set_register(register, value)
 }
 
 // ### 7xkk - ADD Vx, byte
@@ -259,8 +259,8 @@ increment_register_by_value :: proc(
     register: byte,
     value: byte,
 ) {
-    sum := memory.get_register(mem, register) + value
-    memory.set_register(mem, register, sum)
+    sum := mem->get_register(register) + value
+    mem->set_register(register, sum)
 }
 
 
@@ -273,7 +273,7 @@ store_value_from_vy_into_vx :: proc(
     mem: ^memory.Memory,
     register_x, register_y: byte,
 ) {
-    memory.set_register(mem, register_x, memory.get_register(mem, register_y))
+    mem->set_register(register_x, mem->get_register(register_y))
 }
 
 // ### 8xy1 - OR Vx, Vy
@@ -302,20 +302,14 @@ do_bitwise_ops :: proc(
 
     switch bitwise_op {
     case .Or:
-        result =
-            memory.get_register(mem, register_x) |
-            memory.get_register(mem, register_y)
+        result = mem->get_register(register_x) | mem->get_register(register_y)
     case .And:
-        result =
-            memory.get_register(mem, register_x) &
-            memory.get_register(mem, register_y)
+        result = mem->get_register(register_x) & mem->get_register(register_y)
     case .Xor:
-        result =
-            memory.get_register(mem, register_x) ~
-            memory.get_register(mem, register_y)
+        result = mem->get_register(register_x) ~ mem->get_register(register_y)
     }
 
-    memory.set_register(mem, register_x, byte(result))
+    mem->set_register(register_x, byte(result))
 }
 
 // ### 8xy4 - ADD Vx, Vy
@@ -324,14 +318,12 @@ do_bitwise_ops :: proc(
 //
 // The values of Vx and Vy are added together. If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. Only the lowest 8 bits of the result are kept, and stored in Vx.
 add_registers :: proc(mem: ^memory.Memory, register_x, register_y: byte) {
-    result :=
-        memory.get_register(mem, register_x) +
-        memory.get_register(mem, register_y)
+    result := mem->get_register(register_x) + mem->get_register(register_y)
 
     carry := result > 0xFF ? 1 : 0
 
-    memory.set_register(mem, register_x, (result & 0xFF))
-    memory.set_register(mem, 0xF, byte(carry))
+    mem->set_register(register_x, (result & 0xFF))
+    mem->set_register(0xF, byte(carry))
 }
 
 // ### 8xy5 - SUB Vx, Vy
@@ -344,8 +336,8 @@ sub_registers :: proc(
     register_x, register_y: byte,
     reversal: interpreter.Sub_Reversal,
 ) {
-    vx := memory.get_register(mem, register_x)
-    vy := memory.get_register(mem, register_y)
+    vx := mem->get_register(register_x)
+    vy := mem->get_register(register_y)
 
     borrow, result: byte
 
@@ -358,8 +350,8 @@ sub_registers :: proc(
         result = vy - vx
     }
 
-    memory.set_register(mem, 0xF, byte(borrow))
-    memory.set_register(mem, register_x, result)
+    mem->set_register(0xF, byte(borrow))
+    mem->set_register(register_x, result)
 }
 
 // ### 8xy6 - SHR Vx {, Vy}
@@ -378,7 +370,7 @@ shift_register :: proc(
     register_x, register_y: byte,
     shift_direction: interpreter.Shift_Direction,
 ) {
-    vy := memory.get_register(mem, register_y)
+    vy := mem->get_register(register_y)
 
     significant_bit, result: byte
 
@@ -391,8 +383,8 @@ shift_register :: proc(
         result = vy << 1
     }
 
-    memory.set_register(mem, 0xF, significant_bit)
-    memory.set_register(mem, register_x, result)
+    mem->set_register(0xF, significant_bit)
+    mem->set_register(register_x, result)
 }
 
 // ### Annn - LD I, addr
@@ -414,7 +406,7 @@ jump_to_v0_address :: proc(
     mem: ^memory.Memory,
     address: u16,
 ) {
-    v0_value := memory.get_register(mem, 0x0)
+    v0_value := mem->get_register(0x0)
     itp.program_counter = address + u16(v0_value)
 }
 
@@ -429,7 +421,7 @@ set_register_to_random_byte_anded :: proc(
 ) {
     rng := rnd.create(u64(time.to_unix_nanoseconds(time.now())))
     rand := u8(rnd.uint32(&rng) & 0xFF) & kk_byte
-    memory.set_register(mem, register_x, rand)
+    mem->set_register(register_x, rand)
 }
 
 // ### Dxyn - DRW Vx, Vy, nibble
@@ -443,28 +435,28 @@ draw :: proc(
     mem: ^memory.Memory,
     register_x, register_y, amount_to_read: byte,
 ) {
-    coordinate_x := memory.get_register(mem, register_x)
-    coordinate_y := memory.get_register(mem, register_y)
+    coordinate_x := mem->get_register(register_x)
+    coordinate_y := mem->get_register(register_y)
 
-    data := memory.get_range(mem, mem.register_i, int(amount_to_read))
+    data := mem->get_range(mem.register_i, int(amount_to_read))
 
     collision := screen.draw_sprite(scr, coordinate_x, coordinate_y, data)
 
     if collision {
-        memory.set_register(mem, 0xF, byte(0x1))
+        mem->set_register(0xF, byte(0x1))
     } else {
-        memory.set_register(mem, 0xF, byte(0x0))
+        mem->set_register(0xF, byte(0x0))
     }
 
     screen.draw_screen(scr)
 }
 
 set_vx_to_delay_timer :: proc(mem: ^memory.Memory, register_x: byte) {
-    memory.set_register(mem, register_x, mem.delay_timer)
+    mem->set_register(register_x, mem.delay_timer)
 }
 
 set_delay_timer_to_vx :: proc(mem: ^memory.Memory, register_x: byte) {
-    mem.delay_timer = memory.get_register(mem, register_x)
+    mem.delay_timer = mem->get_register(register_x)
 }
 
 // ### Fx1E - ADD I, Vx
@@ -473,7 +465,7 @@ set_delay_timer_to_vx :: proc(mem: ^memory.Memory, register_x: byte) {
 //
 // The values of I and Vx are added, and the results are stored in I.
 increment_i_by_vx :: proc(mem: ^memory.Memory, register_x: byte) {
-    vx_value := memory.get_register(mem, register_x)
+    vx_value := mem->get_register(register_x)
     res := mem.register_i + u16(vx_value)
 
     mem.register_i = res & 0xFFF
@@ -482,8 +474,8 @@ increment_i_by_vx :: proc(mem: ^memory.Memory, register_x: byte) {
 spread_registers_into_memory :: proc(mem: ^memory.Memory, register_x: byte) {
     here := mem.register_i
     for i in 0 ..= register_x {
-        register_value := memory.get_register(mem, i)
-        memory.set_at(mem, (here + u16(i)), register_value)
+        register_value := mem->get_register(i)
+        mem->set_at((here + u16(i)), register_value)
     }
 
     mem.register_i = mem.register_i + u16(register_x) + interpreter.NEXT_ADDR
@@ -495,8 +487,8 @@ load_from_memory_into_registers :: proc(
 ) {
     here := mem.register_i
     for i in 0 ..= register_x {
-        memory_value := memory.get_at(mem, (here + u16(i)))
-        memory.set_register(mem, i, memory_value)
+        memory_value := mem->get_at((here + u16(i)))
+        mem->set_register(i, memory_value)
     }
 
     mem.register_i = mem.register_i + u16(register_x) + interpreter.NEXT_ADDR
