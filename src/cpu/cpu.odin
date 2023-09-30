@@ -378,7 +378,6 @@ shift_register :: proc(
     register_x, register_y: byte,
     shift_direction: interpreter.Shift_Direction,
 ) {
-    // vx := memory.get_register(mem, register_x)
     vy := memory.get_register(mem, register_y)
 
     significant_bit, result: byte
