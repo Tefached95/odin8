@@ -6,17 +6,9 @@ import slice "core:slice"
 import strings "core:strings"
 
 Screen :: struct($W, $H: int) {
-    width:        int,
-    height:       int,
-    pixels:       [H][W]bool,
-    // PROCS
-    draw_screen:  proc(scr: ^Screen(W, H)),
-    clear_screen: proc(scr: ^Screen(W, H)),
-    draw_sprite:  proc(
-        screen: ^Screen(W, H),
-        x, y: byte,
-        data: []byte,
-    ) -> bool,
+    width:  int,
+    height: int,
+    pixels: [H][W]bool,
 }
 
 make_screen :: proc($Width: int, $Height: int) -> ^Screen(Width, Height) {
@@ -25,25 +17,22 @@ make_screen :: proc($Width: int, $Height: int) -> ^Screen(Width, Height) {
             width = Width,
             height = Height,
             pixels = [Height][Width]bool{},
-            draw_screen = draw_screen,
-            clear_screen = clear_screen,
-            draw_sprite = draw_sprite,
         },
     )
 
     return screen
 }
 
-draw_screen :: proc(scr: ^Screen($W, $H)) {
+draw_screen :: proc(screen: ^Screen($W, $H)) {
     string_builder := strings.builder_make()
     defer strings.builder_destroy(&string_builder)
 
     // clear the terminal
     fmt.sbprintf(&string_builder, "%c[%d;%df", 0x1B, 0, 0)
 
-    for y in 0 ..< scr.height {
-        for x in 0 ..< scr.width {
-            fmt.sbprint(&string_builder, (scr.pixels[y][x] ? "█" : " "))
+    for y in 0 ..< screen.height {
+        for x in 0 ..< screen.width {
+            fmt.sbprint(&string_builder, (screen.pixels[y][x] ? "█" : " "))
         }
         fmt.sbprint(&string_builder, "\n")
     }
