@@ -28,8 +28,14 @@ Shift_Direction :: enum {
 }
 
 Interpreter :: struct {
-    program_counter:   u16,
-    instruction_cache: map[string]instruction.Instruction,
+    program_counter:           u16,
+    instruction_cache:         map[string]instruction.Instruction,
+    // PROCS
+    get_current_instruction:   proc(
+        itp: ^Interpreter,
+        mem: ^memory.Memory,
+    ) -> ^instruction.Instruction,
+    increment_program_counter: proc(itp: ^Interpreter),
 }
 
 make_interpreter :: proc(mem: ^memory.Memory) -> ^Interpreter {
@@ -43,6 +49,8 @@ make_interpreter :: proc(mem: ^memory.Memory) -> ^Interpreter {
         Interpreter{
             program_counter = memory.MEMORY_START,
             instruction_cache = cache,
+            get_current_instruction = get_current_instruction,
+            increment_program_counter = increment_program_counter,
         },
     )
 

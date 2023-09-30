@@ -15,7 +15,7 @@ step :: proc(
     scr: ^screen.Screen($W, $H),
 ) {
     // sleep_ms(33)
-    instr := interpreter.get_current_instruction(itp, mem)
+    instr := itp->get_current_instruction(mem)
 
     switch instr.most_significant_byte {
     case 0x0:
@@ -150,7 +150,7 @@ step :: proc(
     }
 
     mem.delay_timer -= 1
-    interpreter.increment_program_counter(itp)
+    itp->increment_program_counter()
 }
 
 sysaddr :: proc(itp: ^interpreter.Interpreter) {
@@ -199,9 +199,9 @@ skip_check_equality :: proc(
 
     switch comp {
     case .Eq:
-        if equal do interpreter.increment_program_counter(itp)
+        if equal do itp->increment_program_counter()
     case .Neq:
-        if !equal do interpreter.increment_program_counter(itp)
+        if !equal do itp->increment_program_counter()
     }
 }
 
@@ -230,9 +230,9 @@ skip_check_register_equality :: proc(
 
     switch comp {
     case .Eq:
-        if equal do interpreter.increment_program_counter(itp)
+        if equal do itp->increment_program_counter()
     case .Neq:
-        if !equal do interpreter.increment_program_counter(itp)
+        if !equal do itp->increment_program_counter()
     }
 }
 
