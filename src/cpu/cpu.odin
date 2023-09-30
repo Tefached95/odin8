@@ -24,7 +24,7 @@ step :: proc(
             return_from_subroutine(itp, mem)
             return
         case 0xE0:
-            screen.clear_screen(scr)
+            scr->clear_screen()
         case:
             sysaddr(itp)
         }
@@ -440,7 +440,7 @@ draw :: proc(
 
     data := mem->get_range(mem.register_i, int(amount_to_read))
 
-    collision := screen.draw_sprite(scr, coordinate_x, coordinate_y, data)
+    collision := scr->draw_sprite(coordinate_x, coordinate_y, data)
 
     if collision {
         mem->set_register(0xF, byte(0x1))
@@ -448,7 +448,7 @@ draw :: proc(
         mem->set_register(0xF, byte(0x0))
     }
 
-    screen.draw_screen(scr)
+    scr->draw_screen()
 }
 
 set_vx_to_delay_timer :: proc(mem: ^memory.Memory, register_x: byte) {
