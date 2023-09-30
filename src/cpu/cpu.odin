@@ -476,10 +476,8 @@ set_delay_timer_to_vx :: proc(mem: ^memory.Memory, register_x: byte) {
 increment_i_by_vx :: proc(mem: ^memory.Memory, register_x: byte) {
     vx_value := memory.get_register(mem, register_x)
     res := mem.register_i + u16(vx_value)
-    carry := res > 0xFFF
 
     mem.register_i = res & 0xFFF
-    memory.set_register(mem, 0xF, byte(carry))
 }
 
 spread_registers_into_memory :: proc(mem: ^memory.Memory, register_x: byte) {
@@ -489,7 +487,7 @@ spread_registers_into_memory :: proc(mem: ^memory.Memory, register_x: byte) {
         memory.set_at(mem, (here + u16(i)), register_value)
     }
 
-    // mem.register_i = mem.register_i + u16(register_x) + interpreter.NEXT_ADDR
+    mem.register_i = mem.register_i + u16(register_x) + interpreter.NEXT_ADDR
 }
 
 load_from_memory_into_registers :: proc(
@@ -502,7 +500,7 @@ load_from_memory_into_registers :: proc(
         memory.set_register(mem, i, memory_value)
     }
 
-    // mem.register_i = mem.register_i + u16(register_x) + interpreter.NEXT_ADDR
+    mem.register_i = mem.register_i + u16(register_x) + interpreter.NEXT_ADDR
 }
 
 @(private)
