@@ -6,14 +6,32 @@ MEMORY_START :: 0x200
 MEMORY_END :: 0xFFF
 
 Memory :: struct {
-    ram:                [4096]byte,
-    registers:          [16]byte,
-    register_i:         u16,
-    program_length:     int,
-    subroutine_stack:   [16]u16,
-    subroutine_pointer: u16,
-    delay_timer:        u8,
-    sound_timer:        u8,
+    ram:                      [4096]byte,
+    registers:                [16]byte,
+    register_i:               u16,
+    program_length:           int,
+    subroutine_stack:         [16]u16,
+    subroutine_pointer:       u16,
+    delay_timer:              u8,
+    sound_timer:              u8,
+    // PROCS
+    load_font_data:           proc(mem: ^Memory),
+    load_program_into_memory: proc(mem: ^Memory, program: []byte),
+    get_at:                   proc(mem: ^Memory, addr: u16) -> byte,
+    set_at:                   proc(mem: ^Memory, addr: u16, value: byte),
+    get_range:                proc(
+        mem: ^Memory,
+        start: u16,
+        length: int,
+    ) -> []byte,
+    set_register:             proc(
+        program_memory: ^Memory,
+        register, value: byte,
+    ),
+    get_register:             proc(
+        program_memory: ^Memory,
+        register: byte,
+    ) -> byte,
 }
 
 make_memory :: proc() -> ^Memory {
@@ -27,6 +45,11 @@ make_memory :: proc() -> ^Memory {
             subroutine_pointer = 0x0,
             delay_timer = 0x0,
             sound_timer = 0x0,
+            get_at = get_at,
+            set_at = set_at,
+            get_range = get_range,
+            set_register = set_register,
+            get_register = get_register,
         },
     )
 }
