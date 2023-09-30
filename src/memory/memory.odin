@@ -14,12 +14,6 @@ Memory :: struct {
     subroutine_pointer: u16,
     delay_timer:        u8,
     sound_timer:        u8,
-    // PROCS
-    get_at:             proc(mem: ^Memory, addr: u16) -> byte,
-    set_at:             proc(mem: ^Memory, addr: u16, value: byte),
-    get_range:          proc(mem: ^Memory, start: u16, length: int) -> []byte,
-    get_register:       proc(mem: ^Memory, register: byte) -> byte,
-    set_register:       proc(mem: ^Memory, register, value: byte),
 }
 
 make_memory :: proc() -> ^Memory {
@@ -33,11 +27,6 @@ make_memory :: proc() -> ^Memory {
             subroutine_pointer = 0x0,
             delay_timer = 0x0,
             sound_timer = 0x0,
-            get_at = get_at,
-            set_at = set_at,
-            get_range = get_range,
-            get_register = get_register,
-            set_register = set_register,
         },
     )
 }
@@ -156,10 +145,10 @@ get_range :: proc(mem: ^Memory, start: u16, length: int) -> []byte {
     return mem.ram[start:(int(start) + length)]
 }
 
-set_register :: proc(mem: ^Memory, register, value: byte) {
-    mem.registers[register] = value
+set_register :: proc(program_memory: ^Memory, register, value: byte) {
+    program_memory.registers[register] = value
 }
 
-get_register :: proc(mem: ^Memory, register: byte) -> byte {
-    return mem.registers[register]
+get_register :: proc(program_memory: ^Memory, register: byte) -> byte {
+    return program_memory.registers[register]
 }
