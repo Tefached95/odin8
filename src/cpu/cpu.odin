@@ -438,7 +438,7 @@ draw :: proc(
     coordinate_x := mem->get_register(register_x)
     coordinate_y := mem->get_register(register_y)
 
-    data := memory.get_range(mem, mem.register_i, int(amount_to_read))
+    data := mem->get_range(mem.register_i, int(amount_to_read))
 
     collision := screen.draw_sprite(scr, coordinate_x, coordinate_y, data)
 
