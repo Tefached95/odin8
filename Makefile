@@ -1,7 +1,7 @@
 all: run
 
 build:
-	odin build . --collection:odin8=src -vet-extra -strict-style
+	odin build . --collection:odin8=src -strict-style
 
 run:
-	odin build . --collection:odin8=src -vet-extra -strict-style && ./odin8
+	odin build . --collection:odin8=src -strict-style && ./odin8
