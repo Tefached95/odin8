@@ -38,6 +38,7 @@ Interpreter :: struct {
         mem: ^memory.Memory,
     ) -> ^instruction.Instruction,
     increment_program_counter: proc(itp: ^Interpreter),
+    decrement_program_counter: proc(itp: ^Interpreter),
 }
 
 make_interpreter :: proc(mem: ^memory.Memory) -> ^Interpreter {
@@ -50,6 +51,7 @@ make_interpreter :: proc(mem: ^memory.Memory) -> ^Interpreter {
             instruction_cache = cache,
             get_current_instruction = get_current_instruction,
             increment_program_counter = increment_program_counter,
+            decrement_program_counter = decrement_program_counter,
         },
     )
 
@@ -102,4 +104,8 @@ populate_instruction_cache :: proc(
 
 increment_program_counter :: proc(itp: ^Interpreter) {
     itp.program_counter += STEP_SIZE
+}
+
+decrement_program_counter :: proc(itp: ^Interpreter) {
+    itp.program_counter -= STEP_SIZE
 }
