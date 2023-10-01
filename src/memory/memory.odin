@@ -32,6 +32,7 @@ Memory :: struct {
         program_memory: ^Memory,
         register: byte,
     ) -> byte,
+    set_i_to_font_address:    proc(mem: ^Memory, register: byte),
 }
 
 make_memory :: proc() -> ^Memory {
@@ -45,11 +46,14 @@ make_memory :: proc() -> ^Memory {
             subroutine_pointer = 0x0,
             delay_timer = 0x0,
             sound_timer = 0x0,
+            load_program_into_memory = load_program_into_memory,
+            load_font_data = load_font_data,
             get_at = get_at,
             set_at = set_at,
             get_range = get_range,
             set_register = set_register,
             get_register = get_register,
+            set_i_to_font_address = set_i_to_font_address,
         },
     )
 }
@@ -174,4 +178,9 @@ set_register :: proc(program_memory: ^Memory, register, value: byte) {
 
 get_register :: proc(program_memory: ^Memory, register: byte) -> byte {
     return program_memory.registers[register]
+}
+
+set_i_to_font_address :: proc(mem: ^Memory, register: byte) {
+    font_address := u16(mem->get_register(register) * FONT_SIZE) + FONT_START
+    mem.register_i = font_address & 0xFFF
 }
