@@ -131,6 +131,8 @@ step :: proc(
             set_vx_to_delay_timer(mem, instr.x)
         case 0x15:
             set_delay_timer_to_vx(mem, instr.x)
+        case 0x29:
+            mem->set_i_to_font_address(instr.x)
         case 0x1E:
             increment_i_by_vx(mem, instr.x)
         case 0x55:
