@@ -90,10 +90,8 @@ byte_to_bool_slice :: proc(n: byte) -> []bool {
     bool_slice := make([]bool, 8)
 
     for i in 0 ..< 8 {
-        bool_slice[i] = (n >> u8(i)) & 0x1 == 1
+        bool_slice[7 - i] = (n >> u8(i)) & 0x1 == 1
     }
-
-    slice.reverse(bool_slice)
 
     return bool_slice
 }
