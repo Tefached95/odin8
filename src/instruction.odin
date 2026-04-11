@@ -1,4 +1,4 @@
-package instruction
+package src
 
 import fmt "core:fmt"
 
@@ -8,16 +8,14 @@ Instruction :: struct {
 }
 
 parse_from_bytes :: proc(command, arguments: byte) -> Instruction {
-    return(
-        Instruction{
-            most_significant_byte = command >> 4,
-            x = command & 0xF,
-            y = arguments >> 4,
-            nibble = arguments & 0xF,
-            kk_byte = arguments,
-            address = be_bytes_to_u16(command, arguments) & 0xFFF,
-        } \
-    )
+    return (Instruction {
+                most_significant_byte = command >> 4,
+                x = command & 0xF,
+                y = arguments >> 4,
+                nibble = arguments & 0xF,
+                kk_byte = arguments,
+                address = be_bytes_to_u16(command, arguments) & 0xFFF,
+            })
 }
 
 debug_print :: proc(instr: ^Instruction) -> string {

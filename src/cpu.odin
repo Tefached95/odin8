@@ -1,4 +1,4 @@
-package cpu
+package src
 
 import "core:fmt"
 import rnd "core:math/rand"
@@ -9,11 +9,7 @@ import interpreter "odin8:interpreter"
 import memory "odin8:memory"
 import screen "odin8:screen"
 
-step :: proc(
-    itp: ^interpreter.Interpreter,
-    mem: ^memory.Memory,
-    scr: ^screen.Screen($W, $H),
-) {
+step :: proc(itp: ^interpreter.Interpreter, mem: ^memory.Memory, scr: ^screen.Screen($W, $H)) {
     // sleep_ms(33)
     instr := itp->get_current_instruction(mem)
 
@@ -35,29 +31,11 @@ step :: proc(
         call_subroutine(itp, mem, instr.address)
         return
     case 0x3:
-        skip_check_equality(
-            itp,
-            mem,
-            instr.x,
-            instr.kk_byte,
-            interpreter.Equality.Eq,
-        )
+        skip_check_equality(itp, mem, instr.x, instr.kk_byte, interpreter.Equality.Eq)
     case 0x4:
-        skip_check_equality(
-            itp,
-            mem,
-            instr.x,
-            instr.kk_byte,
-            interpreter.Equality.Neq,
-        )
+        skip_check_equality(itp, mem, instr.x, instr.kk_byte, interpreter.Equality.Neq)
     case 0x5:
-        skip_check_register_equality(
-            itp,
-            mem,
-            instr.x,
-            instr.y,
-            interpreter.Equality.Eq,
-        )
+        skip_check_register_equality(itp, mem, instr.x, instr.y, interpreter.Equality.Eq)
     case 0x6:
         set_register_to_value(mem, instr.x, instr.kk_byte)
     case 0x7:
@@ -67,53 +45,22 @@ step :: proc(
         case 0x0:
             store_value_from_vy_into_vx(mem, instr.x, instr.y)
         case 0x1 ..= 0x3:
-            do_bitwise_ops(
-                mem,
-                instr.x,
-                instr.y,
-                interpreter.Bitwise_Op(instr.nibble),
-            )
+            do_bitwise_ops(mem, instr.x, instr.y, interpreter.Bitwise_Op(instr.nibble))
         case 0x4:
             add_registers(mem, instr.x, instr.y)
         case 0x5:
-            sub_registers(
-                mem,
-                instr.x,
-                instr.y,
-                interpreter.Sub_Reversal.Standard,
-            )
+            sub_registers(mem, instr.x, instr.y, interpreter.Sub_Reversal.Standard)
         case 0x6:
-            shift_register(
-                mem,
-                instr.x,
-                instr.y,
-                interpreter.Shift_Direction.Right,
-            )
+            shift_register(mem, instr.x, instr.y, interpreter.Shift_Direction.Right)
         case 0x7:
-            sub_registers(
-                mem,
-                instr.x,
-                instr.y,
-                interpreter.Sub_Reversal.Reversed,
-            )
+            sub_registers(mem, instr.x, instr.y, interpreter.Sub_Reversal.Reversed)
         case 0xE:
-            shift_register(
-                mem,
-                instr.x,
-                instr.y,
-                interpreter.Shift_Direction.Left,
-            )
+            shift_register(mem, instr.x, instr.y, interpreter.Shift_Direction.Left)
         case:
             panic(fmt.aprintf("Unsupported nibble %X\n", instr.nibble))
         }
     case 0x9:
-        skip_check_register_equality(
-            itp,
-            mem,
-            instr.x,
-            instr.y,
-            interpreter.Equality.Neq,
-        )
+        skip_check_register_equality(itp, mem, instr.x, instr.y, interpreter.Equality.Neq)
     case 0xA:
         set_register_i_to_address(mem, instr.address)
     case 0xB:
@@ -143,12 +90,7 @@ step :: proc(
             panic(fmt.aprintf("Unsupported argument %X", instr.kk_byte))
         }
     case:
-        panic(
-            fmt.aprintf(
-                "Unsupported instruction %s",
-                instruction.debug_print(instr),
-            ),
-        )
+        panic(fmt.aprintf("Unsupported instruction %s", instruction.debug_print(instr)))
     }
 
     mem.delay_timer -= 1
@@ -159,21 +101,14 @@ sysaddr :: proc(itp: ^interpreter.Interpreter) {
     return
 }
 
-call_subroutine :: proc(
-    itp: ^interpreter.Interpreter,
-    mem: ^memory.Memory,
-    address: u16,
-) {
+call_subroutine :: proc(itp: ^interpreter.Interpreter, mem: ^memory.Memory, address: u16) {
     mem.subroutine_pointer += 1
     mem.subroutine_stack[mem.subroutine_pointer] = itp.program_counter
 
     itp.program_counter = address
 }
 
-return_from_subroutine :: proc(
-    itp: ^interpreter.Interpreter,
-    mem: ^memory.Memory,
-) {
+return_from_subroutine :: proc(itp: ^interpreter.Interpreter, mem: ^memory.Memory) {
     itp.program_counter = mem.subroutine_stack[mem.subroutine_pointer]
     mem.subroutine_pointer -= 1
 }
@@ -243,11 +178,7 @@ skip_check_register_equality :: proc(
 // Set Vx = kk.
 //
 // The interpreter puts the value kk into register Vx.
-set_register_to_value :: proc(
-    mem: ^memory.Memory,
-    register: byte,
-    value: byte,
-) {
+set_register_to_value :: proc(mem: ^memory.Memory, register: byte, value: byte) {
     mem->set_register(register, value)
 }
 
@@ -255,12 +186,8 @@ set_register_to_value :: proc(
 //
 // Set Vx = Vx + kk.
 //
-// Adds the value kk to the value of register Vx, then stores the result in Vx. 
-increment_register_by_value :: proc(
-    mem: ^memory.Memory,
-    register: byte,
-    value: byte,
-) {
+// Adds the value kk to the value of register Vx, then stores the result in Vx.
+increment_register_by_value :: proc(mem: ^memory.Memory, register: byte, value: byte) {
     sum := mem->get_register(register) + value
     mem->set_register(register, sum)
 }
@@ -271,10 +198,7 @@ increment_register_by_value :: proc(
 // Set Vx = Vy.
 //
 // Stores the value of register Vy in register Vx.
-store_value_from_vy_into_vx :: proc(
-    mem: ^memory.Memory,
-    register_x, register_y: byte,
-) {
+store_value_from_vy_into_vx :: proc(mem: ^memory.Memory, register_x, register_y: byte) {
     mem->set_register(register_x, mem->get_register(register_y))
 }
 
@@ -295,11 +219,7 @@ store_value_from_vy_into_vx :: proc(
 // Set Vx = Vx XOR Vy.
 //
 // Performs a bitwise exclusive OR on the values of Vx and Vy, then stores the result in Vx. An exclusive OR compares the corrseponding bits from two values, and if the bits are not both the same, then the corresponding bit in the result is set to 1. Otherwise, it is 0.
-do_bitwise_ops :: proc(
-    mem: ^memory.Memory,
-    register_x, register_y: byte,
-    bitwise_op: interpreter.Bitwise_Op,
-) {
+do_bitwise_ops :: proc(mem: ^memory.Memory, register_x, register_y: byte, bitwise_op: interpreter.Bitwise_Op) {
     result: byte
 
     switch bitwise_op {
@@ -333,11 +253,7 @@ add_registers :: proc(mem: ^memory.Memory, register_x, register_y: byte) {
 // Set Vx = Vx - Vy, set VF = NOT borrow.
 //
 // If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx, and the results stored in Vx.
-sub_registers :: proc(
-    mem: ^memory.Memory,
-    register_x, register_y: byte,
-    reversal: interpreter.Sub_Reversal,
-) {
+sub_registers :: proc(mem: ^memory.Memory, register_x, register_y: byte, reversal: interpreter.Sub_Reversal) {
     vx := mem->get_register(register_x)
     vy := mem->get_register(register_y)
 
@@ -403,40 +319,29 @@ set_register_i_to_address :: proc(mem: ^memory.Memory, address: u16) {
 // Jump to location nnn + V0.
 //
 // The program counter is set to nnn plus the value of V0.
-jump_to_v0_address :: proc(
-    itp: ^interpreter.Interpreter,
-    mem: ^memory.Memory,
-    address: u16,
-) {
+jump_to_v0_address :: proc(itp: ^interpreter.Interpreter, mem: ^memory.Memory, address: u16) {
     v0_value := mem->get_register(0x0)
     itp.program_counter = address + u16(v0_value)
 }
 
 // ### Cxkk - RND Vx, byte
-// 
+//
 // Set Vx = random byte AND kk.
-// 
+//
 // The interpreter generates a random number from 0 to 255, which is then ANDed with the value kk. The results are stored in Vx.
-set_register_to_random_byte_anded :: proc(
-    mem: ^memory.Memory,
-    register_x, kk_byte: byte,
-) {
+set_register_to_random_byte_anded :: proc(mem: ^memory.Memory, register_x, kk_byte: byte) {
     rng := rnd.create(u64(time.to_unix_nanoseconds(time.now())))
     rand := u8(rnd.uint32(&rng) & 0xFF) & kk_byte
     mem->set_register(register_x, rand)
 }
 
 // ### Dxyn - DRW Vx, Vy, nibble
-// 
+//
 // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
-// 
+//
 // The interpreter reads n bytes from memory, starting at the address stored in I. These bytes are then displayed as sprites on screen at coordinates (Vx, Vy).
 // Sprites are XORed onto the existing screen. If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen.
-draw :: proc(
-    scr: ^screen.Screen($W, $H),
-    mem: ^memory.Memory,
-    register_x, register_y, amount_to_read: byte,
-) {
+draw :: proc(scr: ^screen.Screen($W, $H), mem: ^memory.Memory, register_x, register_y, amount_to_read: byte) {
     coordinate_x := mem->get_register(register_x)
     coordinate_y := mem->get_register(register_y)
 
@@ -483,10 +388,7 @@ spread_registers_into_memory :: proc(mem: ^memory.Memory, register_x: byte) {
     mem.register_i = mem.register_i + u16(register_x) + interpreter.NEXT_ADDR
 }
 
-load_from_memory_into_registers :: proc(
-    mem: ^memory.Memory,
-    register_x: byte,
-) {
+load_from_memory_into_registers :: proc(mem: ^memory.Memory, register_x: byte) {
     here := mem.register_i
     for i in 0 ..= register_x {
         memory_value := mem->get_at((here + u16(i)))

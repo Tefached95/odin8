@@ -1,4 +1,4 @@
-package screen
+package src
 
 import fmt "core:fmt"
 import math "core:math"
@@ -12,13 +12,7 @@ Screen :: struct($W, $H: int) {
 }
 
 make_screen :: proc($Width: int, $Height: int) -> ^Screen(Width, Height) {
-    screen := new_clone(
-        Screen(Width, Height){
-            width = Width,
-            height = Height,
-            pixels = [Height][Width]bool{},
-        },
-    )
+    screen := new_clone(Screen(Width, Height){width = Width, height = Height, pixels = [Height][Width]bool{}})
 
     return screen
 }
@@ -48,11 +42,7 @@ clear_screen :: proc(scr: ^Screen($W, $H)) {
     }
 }
 
-draw_sprite :: proc(
-    screen: ^Screen($W, $H),
-    x, y: byte,
-    data: []byte,
-) -> bool {
+draw_sprite :: proc(screen: ^Screen($W, $H), x, y: byte, data: []byte) -> bool {
     collision := false
 
     coord_x := int(x) % screen.width

@@ -1,4 +1,4 @@
-package memory
+package src
 
 FONT_START :: 0x50
 FONT_SIZE :: 0x5
@@ -19,25 +19,15 @@ Memory :: struct {
     load_program_into_memory: proc(mem: ^Memory, program: []byte),
     get_at:                   proc(mem: ^Memory, addr: u16) -> byte,
     set_at:                   proc(mem: ^Memory, addr: u16, value: byte),
-    get_range:                proc(
-        mem: ^Memory,
-        start: u16,
-        length: int,
-    ) -> []byte,
-    set_register:             proc(
-        program_memory: ^Memory,
-        register, value: byte,
-    ),
-    get_register:             proc(
-        program_memory: ^Memory,
-        register: byte,
-    ) -> byte,
+    get_range:                proc(mem: ^Memory, start: u16, length: int) -> []byte,
+    set_register:             proc(program_memory: ^Memory, register, value: byte),
+    get_register:             proc(program_memory: ^Memory, register: byte) -> byte,
     set_i_to_font_address:    proc(mem: ^Memory, register: byte),
 }
 
 make_memory :: proc() -> ^Memory {
     return new_clone(
-        Memory{
+        Memory {
             ram = [4096]byte{},
             registers = [16]byte{},
             register_i = 0x00,
@@ -59,7 +49,7 @@ make_memory :: proc() -> ^Memory {
 }
 
 load_font_data :: proc(mem: ^Memory) {
-    font_set := []u8{
+    font_set := []u8 {
         0xF0,
         0x90,
         0x90,

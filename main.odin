@@ -3,10 +3,10 @@ package main
 import "core:fmt"
 import "core:os"
 
-import cpu "odin8:cpu"
-import interpreter "odin8:interpreter"
-import memory "odin8:memory"
-import screen "odin8:screen"
+import cpu "src"
+import interpreter "src"
+import memory "src"
+import screen "src"
 
 main :: proc() {
     args := os.args

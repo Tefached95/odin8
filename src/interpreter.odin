@@ -1,10 +1,7 @@
-package interpreter
+package src
 
 import fmt "core:fmt"
 import strings "core:strings"
-
-import instruction "odin8:instruction"
-import memory "odin8:memory"
 
 NEXT_ADDR :: 0x1
 STEP_SIZE :: 0x2
@@ -33,10 +30,7 @@ Interpreter :: struct {
     program_counter:           u16,
     instruction_cache:         Instruction_Cache,
     // PROCS
-    get_current_instruction:   proc(
-        itp: ^Interpreter,
-        mem: ^memory.Memory,
-    ) -> ^instruction.Instruction,
+    get_current_instruction:   proc(itp: ^Interpreter, mem: ^memory.Memory) -> ^instruction.Instruction,
     increment_program_counter: proc(itp: ^Interpreter),
 }
 
@@ -45,7 +39,7 @@ make_interpreter :: proc(mem: ^memory.Memory) -> ^Interpreter {
     populate_instruction_cache(mem, &cache)
 
     itp := new_clone(
-        Interpreter{
+        Interpreter {
             program_counter = memory.MEMORY_START,
             instruction_cache = cache,
             get_current_instruction = get_current_instruction,
@@ -56,10 +50,7 @@ make_interpreter :: proc(mem: ^memory.Memory) -> ^Interpreter {
     return itp
 }
 
-get_current_instruction :: proc(
-    itp: ^Interpreter,
-    mem: ^memory.Memory,
-) -> ^instruction.Instruction {
+get_current_instruction :: proc(itp: ^Interpreter, mem: ^memory.Memory) -> ^instruction.Instruction {
     sb := strings.builder_make()
     defer strings.builder_destroy(&sb)
 
@@ -71,9 +62,7 @@ get_current_instruction :: proc(
     instr, ok := &itp.instruction_cache[cache_key]
 
     if ok == false {
-        new_instr := new_clone(
-            instruction.parse_from_bytes(command_byte, argument_byte),
-        )
+        new_instr := new_clone(instruction.parse_from_bytes(command_byte, argument_byte))
         itp.instruction_cache[cache_key] = new_instr^
         return new_instr
     }
@@ -82,16 +71,10 @@ get_current_instruction :: proc(
 }
 
 
-populate_instruction_cache :: proc(
-    mem: ^memory.Memory,
-    cache: ^Instruction_Cache,
-) {
+populate_instruction_cache :: proc(mem: ^memory.Memory, cache: ^Instruction_Cache) {
     for i := 0; i < mem.program_length; i += NEXT_ADDR {
         command_byte := memory.get_at(mem, (u16(i) + memory.MEMORY_START))
-        argument_byte := memory.get_at(
-            mem,
-            (u16(i) + memory.MEMORY_START) + NEXT_ADDR,
-        )
+        argument_byte := memory.get_at(mem, (u16(i) + memory.MEMORY_START) + NEXT_ADDR)
 
         cache_key := instruction.be_bytes_to_u16(command_byte, argument_byte)
 
