@@ -41,4 +41,8 @@ main :: proc() {
     for {
         cpu.step(itp, mem, scr)
     }
+
+    for _, leak in tracking_allocator.allocation_map {
+        fmt.printf("%v leaked %m\n", leak.location, leak.size)
+    }
 }
