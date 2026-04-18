@@ -2,8 +2,8 @@ package interpreter
 
 import strings "core:strings"
 
-import instruction "../instruction"
-import memory "../memory"
+import "../instruction"
+import "../memory"
 
 NEXT_ADDR :: 0x1
 STEP_SIZE :: 0x2
