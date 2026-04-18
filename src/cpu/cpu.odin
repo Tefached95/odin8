@@ -4,10 +4,10 @@ import "core:fmt"
 import rnd "core:math/rand"
 import "core:time"
 
-import instruction "../instruction"
-import interpreter "../interpreter"
-import memory "../memory"
-import screen "../screen"
+import "../instruction"
+import "../interpreter"
+import "../memory"
+import "../screen"
 
 step :: proc(itp: ^interpreter.Interpreter, mem: ^memory.Memory, scr: ^screen.Screen($W, $H)) {
     // sleep_ms(33)
