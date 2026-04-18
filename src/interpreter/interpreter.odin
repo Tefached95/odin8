@@ -1,7 +1,9 @@
-package src
+package interpreter
 
-import fmt "core:fmt"
 import strings "core:strings"
+
+import instruction "../instruction"
+import memory "../memory"
 
 NEXT_ADDR :: 0x1
 STEP_SIZE :: 0x2

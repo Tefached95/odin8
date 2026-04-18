@@ -1,4 +1,4 @@
-package src
+package memory
 
 FONT_START :: 0x50
 FONT_SIZE :: 0x5

@@ -1,8 +1,7 @@
-package src
+package screen
 
 import fmt "core:fmt"
 import math "core:math"
-import slice "core:slice"
 import strings "core:strings"
 
 Screen :: struct($W, $H: int) {

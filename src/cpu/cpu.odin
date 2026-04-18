@@ -1,13 +1,13 @@
-package src
+package cpu
 
 import "core:fmt"
 import rnd "core:math/rand"
 import "core:time"
 
-import instruction "odin8:instruction"
-import interpreter "odin8:interpreter"
-import memory "odin8:memory"
-import screen "odin8:screen"
+import instruction "../instruction"
+import interpreter "../interpreter"
+import memory "../memory"
+import screen "../screen"
 
 step :: proc(itp: ^interpreter.Interpreter, mem: ^memory.Memory, scr: ^screen.Screen($W, $H)) {
     // sleep_ms(33)
@@ -331,7 +331,7 @@ jump_to_v0_address :: proc(itp: ^interpreter.Interpreter, mem: ^memory.Memory, a
 // The interpreter generates a random number from 0 to 255, which is then ANDed with the value kk. The results are stored in Vx.
 set_register_to_random_byte_anded :: proc(mem: ^memory.Memory, register_x, kk_byte: byte) {
     rng := rnd.create(u64(time.to_unix_nanoseconds(time.now())))
-    rand := u8(rnd.uint32(&rng) & 0xFF) & kk_byte
+    rand := u8(rnd.uint32_max(256) & 0xFF) & kk_byte
     mem->set_register(register_x, rand)
 }
 

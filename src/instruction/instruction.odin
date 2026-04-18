@@ -1,4 +1,4 @@
-package src
+package instruction
 
 import fmt "core:fmt"
 
